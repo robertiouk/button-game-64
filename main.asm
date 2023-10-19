@@ -18,7 +18,6 @@ Main:
     // Black border
     lda #$00
     sta VIC.BORDER_COLOUR
-    lda #$06
     sta VIC.SCREEN_COLOUR
 
     // Load map

@@ -31,6 +31,7 @@ MAPLOADER: {
 
         // Set screen and colour locations (start at top left corner)
         lda #$00
+        sta MAPLOADER_ROW
         sta screenMod + 1   // low byte should always be 0
         sta colourMod + 1   // low byte should always be 0
         lda #>VIC.SCREEN_RAM
@@ -38,13 +39,14 @@ MAPLOADER: {
         lda #>VIC.COLOUR_RAM
         sta colourMod + 2
 
+    !rowLoop:
         // Draw row
         lda #$00    // start at left most column and work right
         sta MAPLOADER_COLUMN
         tay
     !columnLoop:
         // Tile number 
-        lda (MAP_DATA), y
+        lda (MAPLOADER_MAP_LOOKUP), y
         // We need TILE_DATA + TILE_DATA_LENGTH * tile number
         sta MULTIPLY_NUM1
         lda #TILE_DATA_LENGTH
@@ -76,15 +78,8 @@ MAPLOADER: {
         iny
         cpy #TILE_DATA_LENGTH
         bne !-
-
         // Tile is now drawn
-        // Increment the column
-        ldy MAPLOADER_COLUMN
-        iny
-        cpy #MAP_TILE_WIDTH
-        beq !nextRow+
-        sty MAPLOADER_COLUMN
-        
+
         // Increment the screen and colour ram
         lda screenMod + 1   // Lo 
         clc
@@ -92,7 +87,6 @@ MAPLOADER: {
         sta screenMod + 1
         bcc !+      // Slight cheat - we're only ever adding 8 bits so can simply increment the Hi byte
         inc screenMod + 2
-        sta screenMod + 2
     !:
         lda colourMod + 1   // Lo
         clc
@@ -100,22 +94,51 @@ MAPLOADER: {
         sta colourMod + 1
         bcc !+
         inc colourMod + 2
-        sta colourMod + 2
     !:
+        // Increment the column
+        ldy MAPLOADER_COLUMN
+        iny
+        cpy #MAP_TILE_WIDTH
+        beq !nextRow+
+        sty MAPLOADER_COLUMN
+
         jmp !columnLoop-
 
     !nextRow:
+        ldy MAPLOADER_ROW
+        iny
+        cpy #MAP_TILE_HEIGHT
+        beq !rowsComplete+
+        sty MAPLOADER_ROW
+
         // Increment the row
         clc
-        lda MAPLOADER_TILE_LOOKUP
+        lda MAPLOADER_MAP_LOOKUP
         adc #MAP_TILE_WIDTH
-        sta MAPLOADER_TILE_LOOKUP
-        lda MAPLOADER_TILE_LOOKUP + 1
+        sta MAPLOADER_MAP_LOOKUP
+        lda MAPLOADER_MAP_LOOKUP + 1
         adc #0
-        sta MAPLOADER_TILE_LOOKUP + 1
+        sta MAPLOADER_MAP_LOOKUP + 1
 
+        .var screenAdvance = (40 - MAP_TILE_WIDTH * TILE_WIDTH) + (TILE_HEIGHT - 1) * 40
         // Increment the screen row
+        clc
+        lda screenMod + 1
+        adc #screenAdvance
+        sta screenMod + 1
+        lda screenMod + 2
+        adc #0
+        sta screenMod + 2
+        clc
+        lda colourMod + 1
+        adc #screenAdvance
+        sta colourMod + 1
+        lda colourMod + 2
+        adc #0
+        sta colourMod + 2
         
+        jmp !rowLoop-
+    !rowsComplete:
         rts
     }
 

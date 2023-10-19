@@ -6,6 +6,7 @@
 // The address of the map, to be used as an indirect pointer
 .label MAPLOADER_MAP_LOOKUP = $07 // 2 bytes
 .label MAPLOADER_COLUMN = $09
+.label MAPLOADER_ROW = $0a
 /**= $02 virtual
     MULTIPLY_NUM1: .byte $00
     MULTIPLY_NUM1_HIGH: .byte $00
