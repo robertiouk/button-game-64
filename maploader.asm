@@ -1,7 +1,3 @@
-.const MAP_DATA = $3000
-.const TILE_DATA = $2900
-.const ATTR_DATA = $2800
-
 .const TILE_WIDTH = 2
 .const TILE_HEIGHT = 2
 
@@ -25,13 +21,13 @@ MAPLOADER: {
     drawMap: {
         // Load the map location
         lda #$00
-        sta MAPLOADER_MAP_LOOKUP
+        sta.zp MAPLOADER_MAP_LOOKUP
         lda #>MAP_DATA  // grab the high byte of the map data location
-        sta MAPLOADER_MAP_LOOKUP + 1
+        sta.zp MAPLOADER_MAP_LOOKUP + 1
 
         // Set screen and colour locations (start at top left corner)
         lda #$00
-        sta MAPLOADER_ROW
+        sta.zp MAPLOADER_ROW
         sta screenMod + 1   // low byte should always be 0
         sta colourMod + 1   // low byte should always be 0
         lda #>VIC.SCREEN_RAM
@@ -42,22 +38,22 @@ MAPLOADER: {
     !rowLoop:
         // Draw row
         lda #$00    // start at left most column and work right
-        sta MAPLOADER_COLUMN
+        sta.zp MAPLOADER_COLUMN
         tay
     !columnLoop:
         // Tile number 
         lda (MAPLOADER_MAP_LOOKUP), y
         // We need TILE_DATA + TILE_DATA_LENGTH * tile number
-        sta MULTIPLY_NUM1
+        sta.zp MULTIPLY_NUM1
         lda #TILE_DATA_LENGTH
-        sta MULTIPLY_NUM2
+        sta.zp MULTIPLY_NUM2
         jsr multiply // store low byte in A/X and high byte in Y
-        sta MAPLOADER_TILE_LOOKUP
+        sta.zp MAPLOADER_TILE_LOOKUP
         // Add the high byte to the TILE_DATA memory location high byte
         tya
         clc
         adc #>TILE_DATA     // i.e., A + $29
-        sta MAPLOADER_TILE_LOOKUP + 1
+        sta.zp MAPLOADER_TILE_LOOKUP + 1
         // The current tile memory address is now set to MAP_LOADER_TILE_LOOKUP
 
         ldy #$00
@@ -96,30 +92,34 @@ MAPLOADER: {
         inc colourMod + 2
     !:
         // Increment the column
-        ldy MAPLOADER_COLUMN
+        ldy.zp MAPLOADER_COLUMN
         iny
         cpy #MAP_TILE_WIDTH
         beq !nextRow+
-        sty MAPLOADER_COLUMN
+        sty.zp MAPLOADER_COLUMN
 
         jmp !columnLoop-
 
     !nextRow:
-        ldy MAPLOADER_ROW
+        ldy.zp MAPLOADER_ROW
         iny
         cpy #MAP_TILE_HEIGHT
         beq !rowsComplete+
-        sty MAPLOADER_ROW
+        sty.zp MAPLOADER_ROW
 
         // Increment the row
         clc
-        lda MAPLOADER_MAP_LOOKUP
+        lda.zp MAPLOADER_MAP_LOOKUP
         adc #MAP_TILE_WIDTH
-        sta MAPLOADER_MAP_LOOKUP
-        lda MAPLOADER_MAP_LOOKUP + 1
+        sta.zp MAPLOADER_MAP_LOOKUP
+        lda.zp MAPLOADER_MAP_LOOKUP + 1
         adc #0
-        sta MAPLOADER_MAP_LOOKUP + 1
+        sta.zp MAPLOADER_MAP_LOOKUP + 1
 
+        // Row advance will be:
+        // (number of chars drawn) + (tile height - 1) * (cols in screen row)
+        // so for 2x2 tiles...
+        // (40 - 20 * 2) + (1) * 40 == 40
         .var screenAdvance = (40 - MAP_TILE_WIDTH * TILE_WIDTH) + (TILE_HEIGHT - 1) * 40
         // Increment the screen row
         clc
@@ -155,24 +155,24 @@ MAPLOADER: {
 
         lda #$00
         tay
-        sty MULTIPLY_NUM1_HIGH  // remove this line for 16*8=16bit multiply
+        sty.zp MULTIPLY_NUM1_HIGH  // remove this line for 16*8=16bit multiply
         beq enterLoop
 
         doAdd:
         clc
-        adc MULTIPLY_NUM1
+        adc.zp MULTIPLY_NUM1
         tax
 
         tya
-        adc MULTIPLY_NUM1_HIGH
+        adc.zp MULTIPLY_NUM1_HIGH
         tay
         txa
 
         loop:
-        asl MULTIPLY_NUM1
-        rol MULTIPLY_NUM1_HIGH
+        asl.zp MULTIPLY_NUM1
+        rol.zp MULTIPLY_NUM1_HIGH
         enterLoop:  // accumulating multiply entry point (enter with .A=lo, .Y=hi)
-        lsr MULTIPLY_NUM2
+        lsr.zp MULTIPLY_NUM2
         bcs doAdd
         bne loop
 

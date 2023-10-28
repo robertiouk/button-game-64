@@ -1,9 +1,18 @@
-*= $2000 "Character set"
-    .import binary "maps\chars.bin"
-*= $2800 "Colours / Attributes (0x2000 + 256 chars = 8192 + (256*8) = 10240 = 0x2800)"
+.label MAP_DATA = $9000
+.label TILE_DATA = $8100
+.label ATTR_DATA = $8000
+
+// Sprite pointers occupy the last 8 bytes of screen memory
+.label SPRITE_POINTERS = VIC.SCREEN_RAM + $3f8
+
+*= $d000 "Character sprites"    // Sprites must be within 16K of screen ram (start of page so divisible by 64)
+    .import binary "assets\character-sprites.bin"
+*= ATTR_DATA "Colours"
     .import binary "maps\colours.bin"
-*= $2900 "Tiles (0x2800 + 32 chars = 0x2800 + 0x100)"
+*= TILE_DATA "Tiles"    // $8000 + 256 attributes    
     .import binary "maps\tiles.bin"
-*= $3000 "Map"
+*= MAP_DATA "Map Data"
     .import binary "maps\map.bin"
+*= $f000 "Character set"
+    .import binary "maps\chars.bin"
 
