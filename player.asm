@@ -18,7 +18,7 @@ PLAYER: {
     playersActive:
         .byte $00
     player1_X:
-        .byte $a0       // 1 pixel accuracy
+        .byte $a0, $00  // 1/16th pixel accuracy (Lo / Hi)
     player1_Y:
         .byte $bd       // 1 pixel accuracy
     player2_X:
@@ -32,7 +32,7 @@ PLAYER: {
     player1WalkIndex:
         .byte $00
     player1WalkSpeed:
-        .byte $01    
+        .byte $02   
 
     initialise: {
         // Set sprite colours
@@ -69,6 +69,10 @@ PLAYER: {
     drawPlayer: {
         lda player1_X
         sta VIC.SPRITE_0_X
+        lda player1_X + 1
+        sta VIC.SPRITE_MSB
+        
+        
         lda player1_Y
         sta VIC.SPRITE_0_Y
 
@@ -113,6 +117,9 @@ PLAYER: {
         lda player1_X
         sbc player1WalkSpeed
         sta player1_X
+        lda player1_X + 1
+        sbc #0
+        sta player1_X + 1
         jmp !done+
     !:
 
@@ -125,6 +132,9 @@ PLAYER: {
         lda player1_X
         adc player1WalkSpeed
         sta player1_X
+        lda player1_X + 1
+        adc #0
+        sta player1_X + 1
     !:
 
     !done:

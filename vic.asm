@@ -10,6 +10,7 @@ VIC: {
 
     .label SPRITE_0_X = $d000
     .label SPRITE_0_Y = $d001
+    .label SPRITE_MSB = $d010
     .label CONTROL_REGISTER = $d011
     .label RASTER_COMPARE_IRQ = $d012
     .label SPRITE_ENABLE = $d015
