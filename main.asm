@@ -1,5 +1,7 @@
 BasicUpstart2(main)
 
+#import "irq.asm"
+#import "macros.asm"
 #import "maploader.asm"
 #import "memory.asm"
 #import "player.asm"
@@ -8,6 +10,9 @@ BasicUpstart2(main)
 
 *=* "Main"
 main:
+    // Set the interrupt
+    jsr IRQ.setup
+
     // Free kernal and basic memory
     configureMemory(MEMORY.BANK_BASIC_AND_KERNEL_FREE, MEMORY.BANK_IOAREA_IO)
 
@@ -33,11 +38,17 @@ main:
     jsr PLAYER.initialise
 
 loop:
+    lda performFrameCodeFlag
+    beq loop    // Only do stuff if IRQ has been hit
+    dec performFrameCodeFlag
 
     jsr PLAYER.playerControl
     jsr PLAYER.drawPlayer
 
     jmp loop
+
+performFrameCodeFlag:
+    .byte $00
 
 clearScreen:
     // $0400 - $07FF (1024 chars)

@@ -13,6 +13,8 @@ MEMORY: {
     .label IO_REGISTER = $01
     .label CIA_INTERRUPT_CONTROL = $dc0d
     .label CIA_INTERRUPT_CONTROL_REGISTER = $dd0d
+    .label INTERRUPT_EXECUTION_ADDRESS_LO = $fffe
+    .label INTERRUPT_EXECUTION_ADDRESS_HI = $ffff
 
     .label BANK_ALL_FREE = $00
     .label BANK_BASIC_AND_KERNEL_FREE = $01
