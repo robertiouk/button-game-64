@@ -7,7 +7,5 @@
 .label MAPLOADER_MAP_LOOKUP = $07 // 2 bytes
 .label MAPLOADER_COLUMN = $09
 .label MAPLOADER_ROW = $0a
-/**= $02 virtual
-    MULTIPLY_NUM1: .byte $00
-    MULTIPLY_NUM1_HIGH: .byte $00
-    MULTIPLY_NUM2: .byte $00*/
+.label JOY1_ZP = $0b
+.label JOY2_ZP = $0c

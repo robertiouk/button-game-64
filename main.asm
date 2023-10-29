@@ -34,6 +34,7 @@ main:
 
 loop:
 
+    jsr PLAYER.playerControl
     jsr PLAYER.drawPlayer
 
     jmp loop
