@@ -1,4 +1,6 @@
 PLAYER: {
+    .label COLLISION_SOLID = %00010000
+
     .label PLAYER_1 = %00000001
     .label PLAYER_2 = %00000010
 
@@ -32,7 +34,15 @@ PLAYER: {
     player1WalkIndex:
         .byte $00
     player1WalkSpeed:
-        .byte $02   
+        .byte $02
+
+    player1FloorCollision:
+        .byte $00
+    player1LeftCollision:
+        .byte $00
+    player1RightCollision:
+        .byte $00
+   
 
     initialise: {
         // Set sprite colours
@@ -100,12 +110,9 @@ PLAYER: {
         bne !+
         lda player1State
         ora #STATE_JUMP
-        // For now, just move up 1 pixel
-        //sta player1State
-        //lda #0
-        //sta player1JumpIndex
-        dec player1_Y
-
+        sta player1State
+        lda #0
+        sta player1JumpIndex
     !:
 
     !left:
@@ -138,6 +145,31 @@ PLAYER: {
     !:
 
     !done:
+        rts
+    }
+
+    jumpAndFall: {
+        // Check jump state
+        lda player1State
+        and #STATE_JUMP
+        beq jumpCheckFinished
+        // Get the current jump frame
+        lda player1JumpIndex
+        tax
+        // Decrement Y by current frame
+        lda player1_Y
+        sec
+        sbc TABLES.jumpAndFallTable, x
+        sta player1_Y
+        // Have we reached the final jump frame?
+        inx
+        stx player1JumpIndex
+        cpx #[TABLES.__jumpAndFallTable - TABLES.jumpAndFallTable]
+        bne jumpCheckFinished
+        lda #STATE_FALL
+        sta player1State    // We're now falling
+    jumpCheckFinished: 
+
         rts
     }
 }

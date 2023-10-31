@@ -5,6 +5,7 @@ BasicUpstart2(main)
 #import "maploader.asm"
 #import "memory.asm"
 #import "player.asm"
+#import "tables.asm"
 #import "vic.asm"
 #import "zeropage.asm"
 
@@ -44,6 +45,7 @@ loop:
 
     jsr PLAYER.playerControl
     jsr PLAYER.drawPlayer
+    jsr PLAYER.jumpAndFall
 
     jmp loop
 
