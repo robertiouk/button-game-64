@@ -6,6 +6,7 @@ BasicUpstart2(main)
 #import "memory.asm"
 #import "player.asm"
 #import "tables.asm"
+#import "utils.asm"
 #import "vic.asm"
 #import "zeropage.asm"
 
@@ -45,6 +46,7 @@ loop:
 
     jsr PLAYER.playerControl
     jsr PLAYER.drawPlayer
+    jsr PLAYER.collisionCheck
     jsr PLAYER.jumpAndFall
 
     jmp loop

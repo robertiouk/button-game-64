@@ -9,3 +9,9 @@
 .label MAPLOADER_ROW = $0a
 .label JOY1_ZP = $0b
 .label JOY2_ZP = $0c
+
+// Some temp variables
+.label TEMP1 = $0f
+.label TEMP2 = $10
+.label TEMP3 = $11
+.label TEMP4 = $12

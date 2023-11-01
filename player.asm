@@ -148,7 +148,172 @@ PLAYER: {
         rts
     }
 
+    collisionCheck: {
+        // Get floor collisions for each foot for player 1
+        lda #00
+        ldx #04      // Left foot double-pixel location / 2
+        ldy #20      // Offset
+        jsr PLAYER.getCollisionPoint
+        jsr UTILS.getCharacterAt
+        tax
+        lda ATTR_DATA, x
+        sta player1FloorCollision
+        
+        lda #00
+        ldx #14      // Right foot double-pixel location / 2
+        ldy #20
+        jsr PLAYER.getCollisionPoint
+        jsr UTILS.getCharacterAt
+        tax
+        lda ATTR_DATA, x
+        ora player1FloorCollision
+        and #$f0
+        sta player1FloorCollision
+
+        // Get left collision
+        lda #00
+        ldx #00
+        ldy #13     // Just beneath chin
+        jsr PLAYER.getCollisionPoint
+        jsr UTILS.getCharacterAt
+        tax
+        lda ATTR_DATA, x
+        sta player1LeftCollision
+
+        // Get right collision
+        lda #00
+        ldx #23
+        ldy #13     // Just beneath chin
+        jsr PLAYER.getCollisionPoint
+        jsr UTILS.getCharacterAt
+        tax
+        lda ATTR_DATA, x
+        sta player1RightCollision
+        
+        rts
+    }
+
+    // Grab the top left corner of sprite and store in zero page
+    getCollisionPoint: {
+        // x register contains x offset (half coordinates)
+        // y register contains y offset
+
+        // Setup variables
+        .var xPixelOffset = TEMP1
+        .var yPixelOffset = TEMP2
+        .var playerPosition = TEMP3 // uses both TEMP3 & 4 - Lo/Hi
+        .var xBorderOffset = 22
+        .var yBorderOffset = 49
+        stx xPixelOffset
+        sty yPixelOffset
+
+        // Calculate x & y in screen space
+        ldy #00
+        lda player1_X, y
+        sta playerPosition
+        iny
+        lda player1_X, y
+        sta playerPosition + 1
+        // Convert from 1:1/16 to 1:1
+        lda playerPosition + 1  // Hi
+        bne !+          // If > 0 skip
+        lda playerPosition      // Lo
+        cmp #xBorderOffset         // Left border edge
+        bcs !+          // If it's > border edge do nothing
+        lda #xBorderOffset         // Assume it's at the edge of the screen
+        sta playerPosition
+    !:
+        lda playerPosition
+        clc
+        adc xPixelOffset
+        sta playerPosition
+        lda playerPosition + 1
+        adc #0
+        sta playerPosition + 1
+        // Done 16 bit addition ^
+        lda playerPosition
+        sec
+        sbc #xBorderOffset
+        sta playerPosition
+        lda playerPosition + 1
+        sbc #0
+        sta playerPosition + 1
+
+        // We now have a value between 0 and 160. We need do turn into 
+        // a value between 0 and 40, so divide by 4.
+        lda playerPosition
+        lsr playerPosition + 1
+        ror 
+        lsr playerPosition + 1
+        ror 
+        lsr playerPosition + 1
+        ror 
+
+        tax
+
+        lda player1_Y
+        
+        cmp #yBorderOffset         // Top of screen
+        bcs !+
+        lda #yBorderOffset
+    !:
+        clc
+        adc yPixelOffset
+        sec 
+        sbc #yBorderOffset
+        // Divide by 8 because while x is stored in half values, y
+        // is stored in quarter values
+        lsr             
+        lsr
+        lsr
+
+        tay
+
+        rts
+    }
+
     jumpAndFall: {
+        // Check falling first, so we don't apply fall immediately after final jump frame
+
+        // If character is still jumping then skip straight to jump code
+        lda player1State
+        cmp #STATE_JUMP
+        beq jumpCheck
+        // Check if character has hit the ground
+        lda player1FloorCollision
+        cmp #COLLISION_SOLID
+        bne falling
+        // Stop falling
+        lda player1State
+        cmp #STATE_FALL
+        bne jumpCheck
+        ora #[255 - STATE_FALL]
+        sta player1State
+        jmp jumpCheck
+    falling:
+        // If not already falling then set fall state
+        lda player1State
+        cmp #STATE_FALL
+        beq !+
+        lda #STATE_FALL
+        sta player1State
+        // Pick first falling frame
+        lda #[TABLES.__jumpAndFallTable - TABLES.jumpAndFallTable - 1]
+        sta player1JumpIndex
+    !:
+        // If already falling then apply next fall frame
+        lda player1JumpIndex
+        tax
+        lda player1_Y
+        clc
+        adc TABLES.jumpAndFallTable, x
+        sta player1_Y
+        // Proceed fall frame
+        cpx #0
+        beq jumpCheck   // Fall frame is max (zero)
+        dex
+        stx player1JumpIndex
+    jumpCheck:
         // Check jump state
         lda player1State
         and #STATE_JUMP
@@ -166,7 +331,8 @@ PLAYER: {
         stx player1JumpIndex
         cpx #[TABLES.__jumpAndFallTable - TABLES.jumpAndFallTable]
         bne jumpCheckFinished
-        lda #STATE_FALL
+        lda player1State
+        ora #[255 - STATE_JUMP]
         sta player1State    // We're now falling
     jumpCheckFinished: 
 
