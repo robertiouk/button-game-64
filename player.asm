@@ -287,7 +287,7 @@ PLAYER: {
         lda player1State
         cmp #STATE_FALL
         bne jumpCheck
-        ora #[255 - STATE_FALL]
+        and #[255 - STATE_FALL]
         sta player1State
         jmp jumpCheck
     falling:
@@ -332,7 +332,9 @@ PLAYER: {
         cpx #[TABLES.__jumpAndFallTable - TABLES.jumpAndFallTable]
         bne jumpCheckFinished
         lda player1State
-        ora #[255 - STATE_JUMP]
+        and #[255 - STATE_JUMP]
+        ora #STATE_FALL     // If this wasn't here we could double jump...
+        dec player1JumpIndex   // ...otherwise we'd be off the end of the table
         sta player1State    // We're now falling
     jumpCheckFinished: 
 
