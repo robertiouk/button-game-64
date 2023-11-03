@@ -14,6 +14,7 @@ VIC: {
     .label CONTROL_REGISTER = $d011
     .label RASTER_COMPARE_IRQ = $d012
     .label SPRITE_ENABLE = $d015
+    .label SPRITE_DOUBLE_Y = $d017
     // The location of screen memory can be changed by controlling $D018
     // The upper 4 bits control the location of screen memory, lower control character memory RELATIVE to bank location
     .label MEMORY_SETUP = $d018

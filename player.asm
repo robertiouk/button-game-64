@@ -34,7 +34,7 @@ PLAYER: {
     player1WalkIndex:
         .byte $00
     player1WalkSpeed:
-        .byte $02
+        .byte $03
 
     player1FloorCollision:
         .byte $00
@@ -72,7 +72,7 @@ PLAYER: {
 
         lda #1
         sta playersActive
-
+        
         rts
     }
 
@@ -152,7 +152,7 @@ PLAYER: {
         // Get floor collisions for each foot for player 1
         lda #00
         ldx #04      // Left foot double-pixel location / 2
-        ldy #20      // Offset
+        ldy #24      // y Offset
         jsr PLAYER.getCollisionPoint
         jsr UTILS.getCharacterAt
         tax
@@ -161,7 +161,7 @@ PLAYER: {
         
         lda #00
         ldx #14      // Right foot double-pixel location / 2
-        ldy #20
+        ldy #24
         jsr PLAYER.getCollisionPoint
         jsr UTILS.getCharacterAt
         tax
@@ -289,6 +289,13 @@ PLAYER: {
         bne jumpCheck
         and #[255 - STATE_FALL]
         sta player1State
+        // Snap to lower precision to snap to floor.
+        // Floor will be multiple of 8, e.g., 80.
+        // Worst case Y will by 7
+        lda player1_Y
+        and #%11111000 // is now a multiple of 8
+        ora #%00000101
+        sta player1_Y
         jmp jumpCheck
     falling:
         // If not already falling then set fall state
