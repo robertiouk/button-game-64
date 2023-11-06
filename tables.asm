@@ -11,4 +11,12 @@ TABLES: {
         .byte $04, $03, $03, $03 
         .byte $02, $02, $02, $01, $01, $00
     __jumpAndFallTable:
+
+    playerWalkLeft:
+        .byte 70, 71, 72, 73, 74, 75
+    __playerWalkLeft:
+        
+    playerWalkRight:
+        .byte 64, 65, 66, 67, 68, 69
+    __playerWalkRight:
 }

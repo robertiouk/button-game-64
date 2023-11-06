@@ -42,7 +42,9 @@ PLAYER: {
         .byte $00
     player1RightCollision:
         .byte $00
-   
+
+    defaultFrame:
+        .byte $40       // dec 64
 
     initialise: {
         // Set sprite colours
@@ -77,11 +79,47 @@ PLAYER: {
     }
 
     drawPlayer: {
+        .var currentFrame = TEMP1
+
+        // Set sprite frame
+        lda defaultFrame
+        sta currentFrame
+
+        lda player1State
+        and #[STATE_WALK_LEFT + STATE_WALK_RIGHT + STATE_FALL + STATE_JUMP]
+        beq setFrame    // If neither of these then not walking
+        // We're walking left or right
+        // Update the frame
+        lda player1WalkIndex
+        tax
+        inx
+        cpx #[TABLES.__playerWalkLeft - TABLES.playerWalkLeft]
+        bne !+
+        ldx #0
+    !:  
+        stx player1WalkIndex
+        // Pick the next walking frame
+        lda player1State
+        cmp #STATE_WALK_LEFT
+        bne right
+    left:
+        ldx player1WalkIndex
+        lda TABLES.playerWalkLeft, x
+        sta currentFrame
+        jmp setFrame
+    right:
+        ldx player1WalkIndex
+        lda TABLES.playerWalkRight, x
+        sta currentFrame
+    setFrame:
+        lda currentFrame
+        sta SPRITE_POINTERS
+
+        // Set sprite position
         lda player1_X
         sta VIC.SPRITE_0_X
         lda player1_X + 1
         sta VIC.SPRITE_MSB
-        
         
         lda player1_Y
         sta VIC.SPRITE_0_Y
@@ -120,6 +158,13 @@ PLAYER: {
         and #JOY_LT
         bne !+
 
+        lda player1State
+        ora #STATE_WALK_LEFT
+        sta player1State
+
+        lda TABLES.playerWalkLeft
+        sta defaultFrame
+
         sec
         lda player1_X
         sbc player1WalkSpeed
@@ -134,6 +179,13 @@ PLAYER: {
         lda.zp JOY1_ZP
         and #JOY_RT
         bne !+
+
+        lda player1State
+        ora #STATE_WALK_RIGHT
+        sta player1State
+
+        lda TABLES.playerWalkRight
+        sta defaultFrame
 
         clc
         lda player1_X
@@ -277,16 +329,16 @@ PLAYER: {
 
         // If character is still jumping then skip straight to jump code
         lda player1State
-        cmp #STATE_JUMP
-        beq jumpCheck
+        and #STATE_JUMP
+        bne jumpCheck
         // Check if character has hit the ground
         lda player1FloorCollision
         cmp #COLLISION_SOLID
         bne falling
         // Stop falling
         lda player1State
-        cmp #STATE_FALL
-        bne jumpCheck
+        and #STATE_FALL
+        beq jumpCheck
         and #[255 - STATE_FALL]
         sta player1State
         // Snap to lower precision to snap to floor.
@@ -300,9 +352,9 @@ PLAYER: {
     falling:
         // If not already falling then set fall state
         lda player1State
-        cmp #STATE_FALL
-        beq !+
-        lda #STATE_FALL
+        and #STATE_FALL
+        bne !+
+        ora #STATE_FALL
         sta player1State
         // Pick first falling frame
         lda #[TABLES.__jumpAndFallTable - TABLES.jumpAndFallTable - 1]
