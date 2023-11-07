@@ -31,6 +31,8 @@ PLAYER: {
         .byte $00
     player1JumpIndex:
         .byte $00
+    player1JumpSprite:
+        .byte $00
     player1WalkIndex:
         .byte $00
     player1WalkSpeed:
@@ -50,10 +52,10 @@ PLAYER: {
         // Set sprite colours
         lda #DARK_GREY
         sta VIC.SPRITE_MULTICOLOUR_1
-        lda #LIGHT_GREEN
+        lda #WHITE
         sta VIC.SPRITE_MULTICOLOUR_2
 
-        lda #WHITE
+        lda #LIGHT_GREEN
         sta VIC.SPRITE_COLOUR_1
 
         lda #ORANGE
@@ -86,11 +88,22 @@ PLAYER: {
         sta currentFrame
 
         lda player1State
-        and #[STATE_WALK_LEFT + STATE_WALK_RIGHT]
+        and #[STATE_WALK_LEFT + STATE_WALK_RIGHT + STATE_FALL + STATE_JUMP]
         beq setFrame    // If neither of these then not walking
         lda player1State
         and #[STATE_FALL + STATE_JUMP]
-        bne setFrame    // If either of these then don't set walk frame
+        beq walkFrame    // If either of these then don't set walk frame
+    jumpFrame:
+        ldx player1JumpSprite
+        lda TABLES.playerJumpLeft, x
+        sta currentFrame
+        inx
+        cpx #[TABLES.__playerJumpLeft - TABLES.playerJumpLeft]
+        beq !+
+        stx player1JumpSprite
+    !:
+        jmp setFrame
+    walkFrame:
         // We're walking left or right
         // Update the frame
         lda player1WalkIndex
@@ -154,6 +167,7 @@ PLAYER: {
         sta player1State
         lda #0
         sta player1JumpIndex
+        sta player1JumpSprite
     !:
 
     !left:
