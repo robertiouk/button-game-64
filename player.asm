@@ -95,7 +95,15 @@ PLAYER: {
         beq walkFrame    // If either of these then don't set walk frame
     jumpFrame:
         ldx player1JumpSprite
+        lda player1State
+        and #[STATE_WALK_LEFT]
+        beq jumpRight
+    jumpLeft:
         lda TABLES.playerJumpLeft, x
+        jmp !+
+    jumpRight:
+        lda TABLES.playerJumpRight, x
+    !:
         sta currentFrame
         inx
         cpx #[TABLES.__playerJumpLeft - TABLES.playerJumpLeft]
