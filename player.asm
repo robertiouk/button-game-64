@@ -86,8 +86,11 @@ PLAYER: {
         sta currentFrame
 
         lda player1State
-        and #[STATE_WALK_LEFT + STATE_WALK_RIGHT + STATE_FALL + STATE_JUMP]
+        and #[STATE_WALK_LEFT + STATE_WALK_RIGHT]
         beq setFrame    // If neither of these then not walking
+        lda player1State
+        and #[STATE_FALL + STATE_JUMP]
+        bne setFrame    // If either of these then don't set walk frame
         // We're walking left or right
         // Update the frame
         lda player1WalkIndex
