@@ -8,8 +8,8 @@ TABLES: {
 
     jumpAndFallTable:
         .byte $07, $06, $05, $05, $04 
-        .byte $04, $03, $03, $03 
-        .byte $02, $02, $02, $01, $01, $00
+        .byte $04, $03, $03, $03, $02 
+        .byte $02, $02, $01, $01, $00
     __jumpAndFallTable:
 
     playerWalkLeft:
@@ -19,4 +19,14 @@ TABLES: {
     playerWalkRight:
         .byte 64, 65, 66, 67, 68, 69
     __playerWalkRight:
+
+    playerJumpLeft:
+        .byte 76, 76, 77, 77, 77
+        .byte 78, 78, 78, 78, 79
+        .byte 79, 79, 80, 80, 80    // peak of jump
+
+        .byte 81, 81, 81, 81, 81
+        .byte 81, 82, 82, 82, 82
+        .byte 82, 82, 82, 82, 82
+    __playerJumpLeft:
 }
