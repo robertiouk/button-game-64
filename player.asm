@@ -47,6 +47,8 @@ PLAYER: {
 
     defaultFrame:
         .byte $40       // dec 64
+    jumpDirection:
+        .byte $00
 
     initialise: {
         // Set sprite colours
@@ -95,7 +97,7 @@ PLAYER: {
         beq walkFrame    // If either of these then don't set walk frame
     jumpFrame:
         ldx player1JumpSprite
-        lda player1State
+        lda jumpDirection
         and #[STATE_WALK_LEFT]
         beq jumpRight
     jumpLeft:
@@ -186,6 +188,7 @@ PLAYER: {
         lda player1State
         ora #STATE_WALK_LEFT
         sta player1State
+        sta jumpDirection
 
         lda TABLES.playerWalkLeft
         sta defaultFrame
@@ -208,6 +211,7 @@ PLAYER: {
         lda player1State
         ora #STATE_WALK_RIGHT
         sta player1State
+        sta jumpDirection
 
         lda TABLES.playerWalkRight
         sta defaultFrame

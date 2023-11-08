@@ -27,16 +27,16 @@ TABLES: {
 
         .byte 81, 81, 81, 81, 81
         .byte 81, 82, 82, 82, 82
-        .byte 82, 82, 82, 82, 82
+        .byte 83, 83, 83, 83, 83
     __playerJumpLeft:
 
     playerJumpRight:
-        .byte 83, 83, 84, 84, 84
-        .byte 85, 85, 85, 85, 86
-        .byte 86, 86, 87, 87, 87    // peak of jump
+        .byte 84, 84, 85, 85, 85
+        .byte 86, 86, 86, 86, 87
+        .byte 87, 87, 88, 88, 88    // peak of jump
 
-        .byte 88, 88, 88, 88, 88
-        .byte 88, 89, 89, 89, 89
         .byte 89, 89, 89, 89, 89
+        .byte 89, 90, 90, 90, 90
+        .byte 91, 91, 91, 91, 91
     __playerJumpRight:
 }
