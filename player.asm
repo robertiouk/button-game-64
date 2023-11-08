@@ -54,7 +54,7 @@ PLAYER: {
         // Set sprite colours
         lda #DARK_GREY
         sta VIC.SPRITE_MULTICOLOUR_1
-        lda #WHITE
+        lda #YELLOW
         sta VIC.SPRITE_MULTICOLOUR_2
 
         lda #LIGHT_GREEN

@@ -1,5 +1,6 @@
 BasicUpstart2(main)
 
+#import "butterfly.asm"
 #import "irq.asm"
 #import "macros.asm"
 #import "maploader.asm"
@@ -38,7 +39,7 @@ main:
     // Load map
     jsr MAPLOADER.drawMap
     jsr PLAYER.initialise
-
+    jsr BUTTERFLY.initialise
 loop:
     lda performFrameCodeFlag
     beq loop    // Only do stuff if IRQ has been hit
@@ -46,6 +47,7 @@ loop:
 
     jsr PLAYER.playerControl
     jsr PLAYER.drawPlayer
+    jsr BUTTERFLY.drawButterfly
     jsr PLAYER.collisionCheck
     jsr PLAYER.jumpAndFall
 

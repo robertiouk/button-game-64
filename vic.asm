@@ -10,6 +10,10 @@ VIC: {
 
     .label SPRITE_0_X = $d000
     .label SPRITE_0_Y = $d001
+    .label SPRITE_1_X = $d002
+    .label SPRITE_1_Y = $d003
+    .label SPRITE_2_X = $d004
+    .label SPRITE_2_Y = $d005
     .label SPRITE_MSB = $d010
     .label CONTROL_REGISTER = $d011
     .label RASTER_COMPARE_IRQ = $d012
