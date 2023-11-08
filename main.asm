@@ -49,6 +49,8 @@ loop:
     jsr PLAYER.collisionCheck
     jsr PLAYER.jumpAndFall
 
+    inc FRAME_COUNTER
+
     jmp loop
 
 performFrameCodeFlag:

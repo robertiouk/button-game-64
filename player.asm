@@ -115,6 +115,9 @@ PLAYER: {
         jmp setFrame
     walkFrame:
         // We're walking left or right
+        lda FRAME_COUNTER
+        and #03             // Update every 4th frame for smooth animation
+        bne setPosition
         // Update the frame
         lda player1WalkIndex
         tax
@@ -141,6 +144,7 @@ PLAYER: {
         lda currentFrame
         sta SPRITE_POINTERS
 
+    setPosition:
         // Set sprite position
         lda player1_X
         sta VIC.SPRITE_0_X

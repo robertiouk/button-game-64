@@ -15,3 +15,5 @@
 .label TEMP2 = $10
 .label TEMP3 = $11
 .label TEMP4 = $12
+
+.label FRAME_COUNTER = $13
