@@ -17,3 +17,4 @@
 .label TEMP4 = $12
 
 .label FRAME_COUNTER = $13
+.label LAST_RANDOM = $14

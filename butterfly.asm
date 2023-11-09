@@ -8,6 +8,8 @@ BUTTERFLY: {
     butterfly2X:
         .byte $20, $01
 
+    
+
     initialise: {
         // Set sprite colours
         lda #DARK_GREY
@@ -34,6 +36,9 @@ BUTTERFLY: {
         ora #%00001100
         sta VIC.SPRITE_MULTICOLOUR
 
+        pickNewYCoord(butterfly1Y)
+        pickNewYCoord(butterfly2Y)
+
         rts
     }
 
@@ -53,4 +58,9 @@ BUTTERFLY: {
     
         rts
     }
+}
+
+.macro pickNewYCoord(butterfly) {
+    getRandom($64, $bd)
+    sta butterfly
 }

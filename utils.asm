@@ -28,3 +28,19 @@ UTILS: {
         rts  
     }
 }
+
+.macro getRandom(lower, upper) {
+pickNumber:
+    // Get the current raster line
+    lda $d012
+    eor FRAME_COUNTER
+    eor LAST_RANDOM
+
+    cmp #[upper - lower]
+    bcc !+      // carry bit set if < limit
+    jmp pickNumber
+!:
+    clc
+    adc #lower
+    sta LAST_RANDOM
+}
