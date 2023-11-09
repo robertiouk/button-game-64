@@ -39,4 +39,9 @@ TABLES: {
         .byte 89, 90, 90, 90, 90
         .byte 91, 91, 91, 91, 91
     __playerJumpRight:
+
+    powerOfTwo:
+        .byte 1, 2, 4, 8, 16, 32, 64, 128
+    invPowerOfTwo:
+        .byte 255-1, 255-2, 255-4, 255-8, 255-16, 255-32, 255-64, 255-128
 }

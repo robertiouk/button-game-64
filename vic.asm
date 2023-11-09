@@ -14,6 +14,8 @@ VIC: {
     .label SPRITE_1_Y = $d003
     .label SPRITE_2_X = $d004
     .label SPRITE_2_Y = $d005
+    .label SPRITE_3_X = $d006
+    .label SPRITE_3_Y = $d007
     .label SPRITE_MSB = $d010
     .label CONTROL_REGISTER = $d011
     .label RASTER_COMPARE_IRQ = $d012
@@ -29,14 +31,14 @@ VIC: {
     .label SCREEN_COLOUR = $d021
     .label SPRITE_MULTICOLOUR_1 = $d025
     .label SPRITE_MULTICOLOUR_2 = $d026
-    .label SPRITE_COLOUR_1 = $d027
-    .label SPRITE_COLOUR_2 = $d028
-    .label SPRITE_COLOUR_3 = $d029
-    .label SPRITE_COLOUR_4 = $d02a
-    .label SPRITE_COLOUR_5 = $d02b
-    .label SPRITE_COLOUR_6 = $d02c
-    .label SPRITE_COLOUR_7 = $d02d
-    .label SPRITE_COLOUR_8 = $d02e
+    .label SPRITE_COLOUR_0 = $d027
+    .label SPRITE_COLOUR_1 = $d028
+    .label SPRITE_COLOUR_2 = $d029
+    .label SPRITE_COLOUR_3 = $d02a
+    .label SPRITE_COLOUR_4 = $d02b
+    .label SPRITE_COLOUR_5 = $d02c
+    .label SPRITE_COLOUR_6 = $d02d
+    .label SPRITE_COLOUR_7 = $d02e
     .label COLOUR_RAM = $d800
     .label DATA_PORT = $dd00
 }
@@ -46,4 +48,18 @@ VIC: {
     and #%11111100
     ora #bank
     sta VIC.DATA_PORT
+}
+
+.macro setSpriteMsb(sprite, xAddress) {
+    ldx #sprite
+    lda xAddress + 1
+    beq !+
+    lda TABLES.powerOfTwo, x
+    ora VIC.SPRITE_MSB
+    jmp endMsb
+!:
+    lda TABLES.invPowerOfTwo, x
+    and VIC.SPRITE_MSB
+endMsb:
+    sta VIC.SPRITE_MSB
 }

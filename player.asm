@@ -58,10 +58,10 @@ PLAYER: {
         sta VIC.SPRITE_MULTICOLOUR_2
 
         lda #LIGHT_GREEN
-        sta VIC.SPRITE_COLOUR_1
+        sta VIC.SPRITE_COLOUR_0
 
         lda #ORANGE
-        sta VIC.SPRITE_COLOUR_2
+        sta VIC.SPRITE_COLOUR_1
     
         lda #$40
         sta SPRITE_POINTERS
@@ -148,9 +148,8 @@ PLAYER: {
         // Set sprite position
         lda player1_X
         sta VIC.SPRITE_0_X
-        lda player1_X + 1
-        sta VIC.SPRITE_MSB
-        
+        setSpriteMsb(0, player1_X)
+
         lda player1_Y
         sta VIC.SPRITE_0_Y
 
