@@ -11,7 +11,7 @@ BUTTERFLY: {
     initialise: {
         // Set sprite colours
         lda #DARK_GREY
-        sta VIC
+        sta VIC.SPRITE_MULTICOLOUR_1
         lda #WHITE
         sta VIC.SPRITE_MULTICOLOUR_2
 
