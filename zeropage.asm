@@ -18,3 +18,9 @@
 
 .label FRAME_COUNTER = $13
 .label LAST_RANDOM = $14
+
+// Some temp vectors
+.label VECTOR1 = $15
+.label VECTOR2 = $17
+.label VECTOR3 = $19
+.label VECTOR4 = $1b
