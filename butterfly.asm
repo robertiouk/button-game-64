@@ -2,7 +2,7 @@ BUTTERFLY: {
     butterfly1Y:
         .byte $52
     butterfly1X:
-        .byte $52, $00
+        .byte $00, $00
     butterfly2Y:
         .byte $50
     butterfly2X:
@@ -61,6 +61,11 @@ BUTTERFLY: {
         inc currentButterfly
         jsr setupButterfly
 
+        getRandom($64, $bd)
+        sta butterfly1Y
+        getRandom($64, $bd)
+        sta butterfly2Y
+
         rts
     }
 
@@ -68,7 +73,6 @@ BUTTERFLY: {
         .var accX = VECTOR1
         .var accY = VECTOR2
         .var movementFrames = VECTOR3
-        .var yPos = VECTOR4
         
         lda currentButterfly
         beq setupButterfly1
@@ -85,10 +89,6 @@ BUTTERFLY: {
         sta movementFrames
         lda #>butterfly2MovementFrames
         sta movementFrames+1
-        lda #<butterfly2Y
-        sta yPos
-        lda #>butterfly2Y
-        sta yPos + 1
         jmp setupComplete
     setupButterfly1:
         lda #<butterfly1AccX
@@ -103,21 +103,14 @@ BUTTERFLY: {
         sta movementFrames
         lda #>butterfly1MovementFrames
         sta movementFrames+1
-        lda #<butterfly1Y
-        sta yPos
-        lda #>butterfly1Y
-        sta yPos + 1
     setupComplete:
         ldy #0
-        getRandom($01, $0a)
+        getRandom($01, $04)
         sta (accX), y
-        getRandom($01, $0a)
+        getRandom($01, $03)
         sta (accY), y
         getRandom($01, $0a)
         sta (movementFrames), y
-        getRandom($64, $bd)
-        sta (yPos), y
-
 
         rts
     }
@@ -136,6 +129,43 @@ BUTTERFLY: {
         lda butterfly2Y
         sta VIC.SPRITE_3_Y
     
+        rts
+    }
+
+    moveButterfly: {
+        // Move butterfly 1 to the right
+        lda butterfly1X
+        clc
+        adc butterfly1AccX
+        sta butterfly1X
+        lda butterfly1X + 1
+        adc #0
+        sta butterfly1X + 1
+        // Move butterfly 1 up or down
+        lda butterfly1AccY
+        and #1      // If odd then up then move down, else, move up
+        beq moveUp
+        // Move down
+        lda butterfly1Y
+        adc butterfly1AccY
+        sta butterfly1Y
+        jmp checkFinishedFrames
+    moveUp:
+        lda butterfly1Y
+        sec
+        sbc butterfly1AccY
+        sta butterfly1Y
+    checkFinishedFrames:
+        dec butterfly1MovementFrames
+        lda butterfly1MovementFrames
+        bne moveSecond
+        lda #0
+        sta currentButterfly
+        jsr setupButterfly
+
+    moveSecond:
+        // Move butterfly 2 to the left
+
         rts
     }
 }

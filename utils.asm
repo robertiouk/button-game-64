@@ -33,8 +33,8 @@ UTILS: {
 pickNumber:
     // Get the current raster line
     lda $d012
-    eor FRAME_COUNTER
-    eor LAST_RANDOM
+    eor $dc04
+    sbc $dc05
 
     cmp #[upper - lower]
     bcc !+      // carry bit set if < limit

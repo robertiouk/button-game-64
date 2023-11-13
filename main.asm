@@ -47,6 +47,7 @@ loop:
 
     jsr PLAYER.playerControl
     jsr PLAYER.drawPlayer
+    jsr BUTTERFLY.moveButterfly
     jsr BUTTERFLY.drawButterfly
     jsr PLAYER.collisionCheck
     jsr PLAYER.jumpAndFall
