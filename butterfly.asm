@@ -1,8 +1,8 @@
 BUTTERFLY: {
     butterfly1Y:
-        .byte $52
-    butterfly1X:
         .byte $00, $00
+    butterfly1X:
+        .byte $00, $00, $00
     butterfly2Y:
         .byte $50
     butterfly2X:
@@ -61,9 +61,9 @@ BUTTERFLY: {
         inc currentButterfly
         jsr setupButterfly
 
-        getRandom($64, $bd)
-        sta butterfly1Y
-        getRandom($64, $bd)
+        getRandom($32, $bd)
+        sta butterfly1Y + 1
+        getRandom($32, $bd)
         sta butterfly2Y
 
         rts
@@ -105,9 +105,9 @@ BUTTERFLY: {
         sta movementFrames+1
     setupComplete:
         ldy #0
-        getRandom($01, $04)
+        getRandom($01, $ff)
         sta (accX), y
-        getRandom($01, $03)
+        getRandom($01, $7f)
         sta (accY), y
         getRandom($01, $0a)
         sta (movementFrames), y
@@ -117,12 +117,27 @@ BUTTERFLY: {
 
     drawButterfly: {
         // Set sprite position
-        lda butterfly1X
+        lda butterfly1X + 1
         sta VIC.SPRITE_2_X
-        setSpriteMsb(2, butterfly1X)
-        lda butterfly1Y
+        setSpriteMsb(2, butterfly1X + 1)
+        lda butterfly1Y + 1
         sta VIC.SPRITE_2_Y
+        lda.zp FRAME_COUNTER
+        and #3
+        bne drawSecond
+        // Set sprite frame
+        lda butterfly1Frame
+        cmp #$5d
+        beq decFrame
+        inc butterfly1Frame
+        jmp !+
+    decFrame:
+        dec butterfly1Frame
+    !:
+        lda butterfly1Frame
+        sta SPRITE_POINTERS + 2
 
+    drawSecond:
         lda butterfly2X
         sta VIC.SPRITE_3_X
         setSpriteMsb(3, butterfly2X)
@@ -141,20 +156,44 @@ BUTTERFLY: {
         lda butterfly1X + 1
         adc #0
         sta butterfly1X + 1
+        lda butterfly1X + 2
+        adc #0
+        sta butterfly1X + 2
+        beq skip
+        // Check if off the end of the screen
+        lda butterfly1X + 1
+        cmp #$93
+        bne skip
+        lda #0
+        sta currentButterfly
+        sta butterfly1X
+        sta butterfly1X + 1
+        sta butterfly1X + 2
+        jsr setupButterfly
+        getRandom($32, $bd)
+        sta butterfly1Y + 1
+    skip:
         // Move butterfly 1 up or down
         lda butterfly1AccY
         and #1      // If odd then up then move down, else, move up
         beq moveUp
         // Move down
         lda butterfly1Y
+        clc
         adc butterfly1AccY
         sta butterfly1Y
+        lda butterfly1Y + 1
+        adc #0
+        sta butterfly1Y + 1
         jmp checkFinishedFrames
     moveUp:
         lda butterfly1Y
         sec
         sbc butterfly1AccY
         sta butterfly1Y
+        lda butterfly1Y + 1
+        sbc #0
+        sta butterfly1Y + 1 
     checkFinishedFrames:
         dec butterfly1MovementFrames
         lda butterfly1MovementFrames
