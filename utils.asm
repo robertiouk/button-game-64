@@ -35,10 +35,32 @@ pickNumber:
     lda $d012
     eor $dc04
     sbc $dc05
+    sta LAST_RANDOM
 
+    ldx #0
+    lda #[upper - lower]
+nextPower:
+    cmp TABLES.powerOfTwo, x
+    bcc pickFromTable     // less than current power? 
+    beq pickFromTable     // equal to current power?    
+    inx
+    cpx #8
+    bcs !+          // greater than or equal to
+    jmp nextPower
+!:
+    lda #$ff
+    jmp gotMask
+pickFromTable:
+    ldy TABLES.powerOfTwo, x
+    dey
+    tya
+gotMask:
+    and LAST_RANDOM
     cmp #[upper - lower]
-    bcc !+      // carry bit set if < limit
-    jmp pickNumber
+    
+    bcc !+  // carry bit set if < limit
+    sec
+    sbc #[upper - lower]
 !:
     clc
     adc #lower

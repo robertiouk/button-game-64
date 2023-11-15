@@ -61,9 +61,10 @@ BUTTERFLY: {
         inc currentButterfly
         jsr setupButterfly
 
-        getRandom($32, $bd)
+        getRandom($32, $96)
         sta butterfly1Y + 1
-        getRandom($32, $bd)
+        //getRandom($32, $bd)
+        lda #$96
         sta butterfly2Y
 
         rts
@@ -106,10 +107,13 @@ BUTTERFLY: {
     setupComplete:
         ldy #0
         getRandom($01, $ff)
+        ldy #0
         sta (accX), y
         getRandom($01, $7f)
+        ldy #0
         sta (accY), y
         getRandom($01, $0a)
+        ldy #0
         sta (movementFrames), y
 
         rts
@@ -162,15 +166,16 @@ BUTTERFLY: {
         beq skip
         // Check if off the end of the screen
         lda butterfly1X + 1
-        cmp #$93
+        cmp #$60
         bne skip
         lda #0
         sta currentButterfly
         sta butterfly1X
         sta butterfly1X + 1
         sta butterfly1X + 2
+        sta butterfly1Y
         jsr setupButterfly
-        getRandom($32, $bd)
+        getRandom($32, $96)
         sta butterfly1Y + 1
     skip:
         // Move butterfly 1 up or down
