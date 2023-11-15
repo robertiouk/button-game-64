@@ -112,7 +112,7 @@ BUTTERFLY: {
         getRandom($01, $7f)
         ldy #0
         sta (accY), y
-        getRandom($01, $0a)
+        getRandom($01, $14)
         ldy #0
         sta (movementFrames), y
 
