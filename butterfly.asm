@@ -3,6 +3,10 @@ BUTTERFLY: {
         .byte $b4
     yCeiling:
         .byte $32
+    xMin:
+        .byte $20
+    xMax:
+        .byte $30
 
     butterfly1Y:
         .byte $00, $00
@@ -11,7 +15,7 @@ BUTTERFLY: {
     butterfly2Y:
         .byte $50
     butterfly2X:
-        .byte $20, $01
+        .byte $30, $01
 
     butterfly1AccX:
         .byte $00
@@ -157,6 +161,31 @@ BUTTERFLY: {
     }
 
     moveButterfly: {
+        lda butterfly1X + 1
+        cmp xMin
+        bcc moveRight
+        lda butterfly1X + 2
+        beq randomDirection
+        lda butterfly1X + 1
+        cmp xMax
+        bcs moveLeft
+    randomDirection:
+        lda butterfly1AccX
+        and #1
+        beq moveRight
+    moveLeft:
+        lda butterfly1X
+        sec
+        sbc butterfly1AccX
+        sta butterfly1X
+        lda butterfly1X + 1
+        sbc #0
+        sta butterfly1X + 1
+        lda butterfly1X + 2
+        sbc #0
+        sta butterfly1X + 2
+        jmp skip
+    moveRight:
         // Move butterfly 1 to the right
         lda butterfly1X
         clc
