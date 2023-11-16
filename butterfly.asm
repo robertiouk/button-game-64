@@ -1,4 +1,9 @@
 BUTTERFLY: {
+    yFloor:
+        .byte $b4
+    yCeiling:
+        .byte $32
+
     butterfly1Y:
         .byte $00, $00
     butterfly1X:
@@ -64,7 +69,7 @@ BUTTERFLY: {
         getRandom($32, $96)
         sta butterfly1Y + 1
         //getRandom($32, $bd)
-        lda #$96
+        lda #$b4
         sta butterfly2Y
 
         rts
@@ -178,10 +183,16 @@ BUTTERFLY: {
         getRandom($32, $96)
         sta butterfly1Y + 1
     skip:
+        lda butterfly1Y + 1
+        cmp yCeiling
+        bcc moveDown
+        cmp yFloor
+        bcs moveUp
         // Move butterfly 1 up or down
         lda butterfly1AccY
         and #1      // If odd then up then move down, else, move up
         beq moveUp
+    moveDown:
         // Move down
         lda butterfly1Y
         clc
