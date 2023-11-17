@@ -24,7 +24,7 @@ BUTTERFLY: {
     butterfly1MovementFrames:
         .byte $00
     butterfly1Frame:
-        .byte $5c       // 40 = 1c
+        .byte $5e       // 40 = 1e
 
     butterfly2AccX:
         .byte $00
@@ -33,7 +33,7 @@ BUTTERFLY: {
     butterfly2MovementFrames:
         .byte $00
     butterfly2Frame:
-        .byte $5e       // 40 = 1e
+        .byte $61 
 
     currentButterfly:
         .byte $00
@@ -139,7 +139,7 @@ BUTTERFLY: {
         bne drawSecond
         // Set sprite frame
         lda butterfly1Frame
-        cmp #$5d
+        cmp #$5f
         beq decFrame
         inc butterfly1Frame
         jmp !+
@@ -160,7 +160,7 @@ BUTTERFLY: {
         bne done
         // Set sprite frame
         lda butterfly2Frame
-        cmp #$5f
+        cmp #$61
         beq decFrame2
         inc butterfly2Frame
         jmp !+

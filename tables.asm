@@ -25,19 +25,19 @@ TABLES: {
         .byte 78, 78, 78, 78, 79
         .byte 79, 79, 80, 80, 80    // peak of jump
 
-        .byte 81, 81, 81, 81, 81
-        .byte 81, 82, 82, 82, 82
-        .byte 83, 83, 83, 83, 83
+        .byte 81, 81, 81, 82, 82
+        .byte 82, 82, 82, 83, 83
+        .byte 83, 84, 84, 84, 84
     __playerJumpLeft:
 
     playerJumpRight:
-        .byte 84, 84, 85, 85, 85
-        .byte 86, 86, 86, 86, 87
-        .byte 87, 87, 88, 88, 88    // peak of jump
+        .byte 85, 85, 86, 86, 86
+        .byte 87, 87, 87, 87, 88
+        .byte 88, 88, 89, 89, 89    // peak of jump
 
-        .byte 89, 89, 89, 89, 89
-        .byte 89, 90, 90, 90, 90
-        .byte 91, 91, 91, 91, 91
+        .byte 90, 90, 90, 91, 91
+        .byte 91, 91, 91, 92, 92
+        .byte 92, 93, 93, 93, 93
     __playerJumpRight:
 
     powerOfTwo:
