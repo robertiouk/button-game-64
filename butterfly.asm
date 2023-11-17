@@ -3,6 +3,10 @@ BUTTERFLY: {
         .byte $b4
     yCeiling:
         .byte $32
+    xMin:
+        .byte $32
+    xMax:
+        .byte $60
 
     butterfly1Y:
         .byte $00, $00
@@ -68,9 +72,8 @@ BUTTERFLY: {
 
         getRandom($32, $96)
         sta butterfly1Y + 1
-        //getRandom($32, $bd)
-        lda #$b4
-        sta butterfly2Y
+        getRandom($32, $96)
+        sta butterfly2Y + 1
 
         rts
     }
@@ -157,69 +160,183 @@ BUTTERFLY: {
     }
 
     moveButterfly: {
-        // Move butterfly 1 to the right
-        lda butterfly1X
-        clc
-        adc butterfly1AccX
-        sta butterfly1X
-        lda butterfly1X + 1
-        adc #0
-        sta butterfly1X + 1
-        lda butterfly1X + 2
-        adc #0
-        sta butterfly1X + 2
-        beq skip
-        // Check if off the end of the screen
-        lda butterfly1X + 1
-        cmp #$60
-        bne skip
-        lda #0
+        .var butterflyX = VECTOR1
+        .var butterflyY = VECTOR2
+        .var butterflyAccX = VECTOR3
+        .var butterflyAccY = VECTOR4
+
+        lda #1
         sta currentButterfly
-        sta butterfly1X
-        sta butterfly1X + 1
-        sta butterfly1X + 2
+    startSetup:
+        beq setupButterfly1
+    setupButterfly2:
+        lda #<butterfly2X
+        sta butterflyX
+        lda #>butterfly2X
+        sta butterflyX + 1
+        lda #<butterfly2Y
+        sta butterflyY
+        lda #>butterfly2Y + 1
+        sta butterflyY + 1
+        lda #<butterfly2AccX
+        sta butterflyAccX
+        lda #>butterfly2AccX
+        sta butterflyAccX + 1
+        lda #<butterfly2AccY
+        sta butterflyAccY
+        lda #>butterfly2AccY 
+        sta butterflyAccY + 1
+        jmp setupComplete
+    setupButterfly1:
+        lda #<butterfly1X
+        sta butterflyX
+        lda #>butterfly1X
+        sta butterflyX + 1
+        lda #<butterfly1Y
+        sta butterflyY
+        lda #>butterfly1Y + 1
+        sta butterflyY + 1
+        lda #<butterfly1AccX
+        sta butterflyAccX
+        lda #>butterfly1AccX
+        sta butterflyAccX + 1
+        lda #<butterfly1AccY
+        sta butterflyAccY
+        lda #>butterfly1AccY 
+        sta butterflyAccY + 1
+    setupComplete:
+
+        ldy #0
+        lda currentButterfly
+        beq moveRight
+    moveLeft:
+.break
+        lda (butterflyX), y
+        sec
+        sbc (butterflyAccX), y
+        sta (butterflyX), y
+        iny
+        lda (butterflyX), y
+        sbc #0
+        sta (butterflyX), y
+        iny
+        lda (butterflyX), y
+        sbc #0
+        sta (butterflyX), y
+        bne !+
+        jmp skip
+    !:
+        // Check if off the end of the screen
+        ldy #1
+        lda (butterflyX), y
+        cmp xMin
+        beq !+
+        jmp skip
+    !:
+        lda #0
+        ldy #0
+        sta (butterflyX), y
+        sta (butterflyY), y
+        iny
+        lda xMax
+        sta (butterflyX), y
+        iny
+        lda #1
+        sta (butterflyX), y
         sta butterfly1Y
         jsr setupButterfly
         getRandom($32, $96)
-        sta butterfly1Y + 1
+        ldy #1
+        sta (butterflyY), y
+        jmp skip
+    moveRight:
+        // Move butterfly 1 to the right
+        ldy #0
+        lda (butterflyX), y
+        clc
+        adc (butterflyAccX), y
+        sta (butterflyX), y
+        iny
+        lda (butterflyX), y
+        adc #0
+        sta (butterflyX), y
+        iny
+        lda (butterflyX), y
+        adc #0
+        sta (butterflyX), y
+        beq skip
+        // Check if off the end of the screen
+        ldy #1
+        lda (butterflyX), y
+        cmp xMax
+        bne skip
+        lda #0
+        ldy #0
+        sta (butterflyX), y
+        sta (butterflyY), y
+        iny
+        sta (butterflyX), y
+        iny
+        sta (butterflyX), y
+        jsr setupButterfly
+        getRandom($32, $96)
+        ldy #1
+        sta (butterflyY), y
     skip:
-        lda butterfly1Y + 1
+        ldy #1
+        lda (butterflyY), y
         cmp yCeiling
         bcc moveDown
         cmp yFloor
         bcs moveUp
         // Move butterfly 1 up or down
-        lda butterfly1AccY
+        ldy #0
+        lda (butterflyAccY), y
         and #1      // If odd then up then move down, else, move up
         beq moveUp
     moveDown:
         // Move down
-        lda butterfly1Y
+        ldy #0
+        lda (butterflyY), y
         clc
-        adc butterfly1AccY
-        sta butterfly1Y
-        lda butterfly1Y + 1
+        adc (butterflyAccY), y
+        sta (butterflyY), y
+        iny
+        lda (butterflyY), y
         adc #0
-        sta butterfly1Y + 1
+        sta (butterflyY), y
         jmp checkFinishedFrames
     moveUp:
-        lda butterfly1Y
+        ldy #0
+        lda (butterflyY), y
         sec
-        sbc butterfly1AccY
-        sta butterfly1Y
-        lda butterfly1Y + 1
+        sbc (butterflyAccY), y
+        sta (butterflyY), y
+        iny
+        lda (butterflyY), y
         sbc #0
-        sta butterfly1Y + 1 
+        sta (butterflyY), y 
     checkFinishedFrames:
+        lda currentButterfly
+        beq animateFirst
+        dec butterfly2MovementFrames
+        lda butterfly2MovementFrames
+        bne !+
+        jsr setupButterfly
+        jmp !+
+    animateFirst:
         dec butterfly1MovementFrames
         lda butterfly1MovementFrames
-        bne moveSecond
-        lda #0
-        sta currentButterfly
+        bne !+
         jsr setupButterfly
-
-    moveSecond:
-        // Move butterfly 2 to the left
+    !:
+        ldx currentButterfly
+        beq complete
+        dex
+        txa
+        sta currentButterfly
+        jmp startSetup
+    complete:
 
         rts
     }
