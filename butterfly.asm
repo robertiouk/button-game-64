@@ -40,13 +40,9 @@ BUTTERFLY: {
 
     initialise: {
         // Set sprite colours
-        lda #DARK_GREY
-        sta VIC.SPRITE_MULTICOLOUR_1
-        lda #WHITE
-        sta VIC.SPRITE_MULTICOLOUR_2
-
-        lda #BROWN
+        lda #CYAN
         sta VIC.SPRITE_COLOUR_2
+        lda #WHITE
         sta VIC.SPRITE_COLOUR_3
 
         lda butterfly1Frame

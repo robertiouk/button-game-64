@@ -22,7 +22,7 @@ PLAYER: {
     player1_X:
         .byte $a0, $00  // 1/16th pixel accuracy (Lo / Hi)
     player1_Y:
-        .byte $bd       // 1 pixel accuracy
+        .byte $a8       // 1 pixel accuracy
     player2_X:
         .byte $80       // 1 pixel accuracy
     player2_Y:
@@ -57,7 +57,7 @@ PLAYER: {
         lda #YELLOW
         sta VIC.SPRITE_MULTICOLOUR_2
 
-        lda #LIGHT_GREEN
+        lda #WHITE
         sta VIC.SPRITE_COLOUR_0
 
         lda #ORANGE
@@ -78,6 +78,7 @@ PLAYER: {
 
         lda #1
         sta playersActive
+        sta VIC.SPRITE_DOUBLE_Y
         
         rts
     }
@@ -236,7 +237,7 @@ PLAYER: {
         // Get floor collisions for each foot for player 1
         lda #00
         ldx #04      // Left foot double-pixel location / 2
-        ldy #24      // y Offset
+        ldy #48     // y Offset. This should be halved for small sprite (#24)
         jsr PLAYER.getCollisionPoint
         jsr UTILS.getCharacterAt
         tax
@@ -245,7 +246,7 @@ PLAYER: {
         
         lda #00
         ldx #14      // Right foot double-pixel location / 2
-        ldy #24
+        ldy #48
         jsr PLAYER.getCollisionPoint
         jsr UTILS.getCharacterAt
         tax
@@ -378,8 +379,9 @@ PLAYER: {
         // Worst case Y will by 7
         lda player1_Y
         and #%11111000 // is now a multiple of 8
-        ora #%00000101
+        ora #%00000111  // ora 101 worked well for small sprite
         sta player1_Y
+        inc player1_Y
         jmp jumpCheck
     falling:
         // If not already falling then set fall state

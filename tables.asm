@@ -7,8 +7,8 @@ TABLES: {
         .fill 25, >[$c000 + i * 40]    // .byte (msb) $[c0]00, $[c0]28, $[c0]50, ...
 
     jumpAndFallTable:
-        .byte $07, $06, $05, $05, $04 
-        .byte $04, $03, $03, $03, $02 
+        .byte $07, $06, $05, $05, $05 
+        .byte $04, $04, $03, $03, $02 
         .byte $02, $02, $01, $01, $00
     __jumpAndFallTable:
 
@@ -26,8 +26,8 @@ TABLES: {
         .byte 79, 79, 80, 80, 80    // peak of jump
 
         .byte 81, 81, 81, 82, 82
-        .byte 82, 82, 82, 83, 83
-        .byte 83, 84, 84, 84, 84
+        .byte 82, 82, 83, 83, 83
+        .byte 84, 84, 84, 84, 84
     __playerJumpLeft:
 
     playerJumpRight:
@@ -36,8 +36,8 @@ TABLES: {
         .byte 88, 88, 89, 89, 89    // peak of jump
 
         .byte 90, 90, 90, 91, 91
-        .byte 91, 91, 91, 92, 92
-        .byte 92, 93, 93, 93, 93
+        .byte 91, 91, 92, 92, 92
+        .byte 93, 93, 93, 93, 93
     __playerJumpRight:
 
     powerOfTwo:
