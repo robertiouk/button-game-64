@@ -66,3 +66,12 @@ gotMask:
     adc #lower
     sta LAST_RANDOM
 }
+
+/** Assumes the value is in A register */
+.macro modulo(modulo) {
+    sec
+modulus:
+    sbc #modulo
+    bcs modulus
+    adc #modulo
+}

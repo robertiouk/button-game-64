@@ -25,6 +25,8 @@ BUTTERFLY: {
         .byte $00
     butterfly1Frame:
         .byte $5e       // 40 = 1e
+    butterfly1Type:
+        .byte $00
 
     butterfly2AccX:
         .byte $00
@@ -34,17 +36,13 @@ BUTTERFLY: {
         .byte $00
     butterfly2Frame:
         .byte $61 
+    butterfly2Type:
+        .byte $00
 
     currentButterfly:
         .byte $00
 
     initialise: {
-        // Set sprite colours
-        lda #CYAN
-        sta VIC.SPRITE_COLOUR_2
-        lda #WHITE
-        sta VIC.SPRITE_COLOUR_3
-
         lda butterfly1Frame
         sta SPRITE_POINTERS + 2
         lda butterfly2Frame
@@ -62,16 +60,85 @@ BUTTERFLY: {
 
         lda #0
         sta currentButterfly
-        jsr setupButterfly
+        jsr pickNewButterfly
         inc currentButterfly
-        jsr setupButterfly
-
-        getRandom($32, $96)
-        sta butterfly1Y + 1
-        getRandom($32, $96)
-        sta butterfly2Y + 1
+        jsr pickNewButterfly
 
         rts
+    }
+
+    pickNewButterfly: {
+        .var type = VECTOR4
+        
+        jsr setupButterfly
+
+        lda currentButterfly
+        beq setButterfly1Y
+    setupButterfly2Y:
+        lda #<butterfly2Type
+        sta type
+        lda #>butterfly2Type
+        sta type + 1
+
+        lda #0
+        sta butterfly2X
+        sta butterfly2Y
+        lda xMax
+        sta butterfly2X + 1
+        lda #1
+        sta butterfly2X + 2
+        getRandom($32, $96)
+        sta butterfly2Y + 1
+        jmp pickType
+    setButterfly1Y:
+        lda #<butterfly1Type
+        sta type
+        lda #>butterfly1Type
+        sta type + 1
+
+        lda #0
+        sta butterfly1X
+        sta butterfly1Y
+        sta butterfly1X + 1
+        sta butterfly1X + 2
+        getRandom($32, $96)
+        sta butterfly1Y + 1
+
+    pickType:
+        // Pick type
+        getRandom($0, $0b)
+    checkPurple:
+        cmp #$0a
+        bne checkRed
+.break
+        ldx #3
+        jmp done
+    checkRed:
+        tay
+        modulo(5)
+        bne checkBlue
+        ldx #2
+        jmp done
+    checkBlue:
+        tya
+        modulo(3)
+        bne white
+        ldx #1
+        jmp done
+    white:
+        ldx #0
+    done:
+        lda TABLES.butterflyTypes, x
+        ldy #0
+        sta (type), y
+        ldx currentButterfly
+        beq setSprite1Colour
+        sta VIC.SPRITE_COLOUR_3
+        jmp !+
+    setSprite1Colour:
+        sta VIC.SPRITE_COLOUR_2
+    !:
+        rts    
     }
 
     setupButterfly: {
@@ -189,13 +256,8 @@ BUTTERFLY: {
         cmp xMax
         bne butterfly2
         lda #0
-        sta butterfly1X
-        sta butterfly1Y
-        sta butterfly1X + 1
-        sta butterfly1X + 2
-        jsr setupButterfly
-        getRandom($32, $96)
-        sta butterfly1Y + 1
+        sta currentButterfly
+        jsr pickNewButterfly
     butterfly2:
         lda butterfly2X
         sec
@@ -212,17 +274,9 @@ BUTTERFLY: {
         lda butterfly2X + 1
         cmp xMin
         bne moveY
-        lda #0
-        sta butterfly2X
-        sta butterfly2Y
-        lda xMax
-        sta butterfly2X + 1
         lda #1
-        sta butterfly2X + 2
         sta currentButterfly
-        jsr setupButterfly
-        getRandom($32, $96)
-        sta butterfly2Y + 1
+        jsr pickNewButterfly
     moveY:
         jsr moveSpritesY
     checkFinishedFrames:

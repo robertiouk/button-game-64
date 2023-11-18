@@ -44,4 +44,7 @@ TABLES: {
         .byte 1, 2, 4, 8, 16, 32, 64, 128
     invPowerOfTwo:
         .byte 255-1, 255-2, 255-4, 255-8, 255-16, 255-32, 255-64, 255-128
+
+    butterflyTypes:
+        .byte WHITE, CYAN, LIGHT_RED, PURPLE
 }
