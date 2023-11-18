@@ -87,7 +87,7 @@ BUTTERFLY: {
         sta butterfly2X + 1
         lda #1
         sta butterfly2X + 2
-        getRandom($32, $96)
+        getRandom($32, $b4)
         sta butterfly2Y + 1
         jmp pickType
     setButterfly1Y:
@@ -101,7 +101,7 @@ BUTTERFLY: {
         sta butterfly1Y
         sta butterfly1X + 1
         sta butterfly1X + 2
-        getRandom($32, $96)
+        getRandom($32, $b4)
         sta butterfly1Y + 1
 
     pickType:
