@@ -275,6 +275,27 @@ PLAYER: {
         lda ATTR_DATA, x
         sta player1RightCollision
         
+        jsr checkButterflyCaught
+
+        rts
+    }
+
+    checkButterflyCaught: {
+        lda VIC.SPRITE_COLLISION
+        tay
+        and #%00000001
+        beq noCatch
+        tya
+        and #%00000100
+        bne caughtButterfly1
+        lda #1
+        jmp !+
+    caughtButterfly1:
+        lda #0
+    !:
+        sta BUTTERFLY.currentButterfly
+        jsr BUTTERFLY.pickNewButterfly
+    noCatch:
         rts
     }
 

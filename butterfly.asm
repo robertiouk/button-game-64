@@ -110,7 +110,6 @@ BUTTERFLY: {
     checkPurple:
         cmp #$0a
         bne checkRed
-.break
         ldx #3
         jmp done
     checkRed:

@@ -27,6 +27,7 @@ VIC: {
     .label INTERRUPT_FLAG_REGISTER = $d019
     .label INTERRUPT_CONTROL = $d01a
     .label SPRITE_MULTICOLOUR = $d01c
+    .label SPRITE_COLLISION = $d01e
     .label BORDER_COLOUR = $d020
     .label SCREEN_COLOUR = $d021
     .label SPRITE_MULTICOLOUR_1 = $d025
