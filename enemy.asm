@@ -10,6 +10,17 @@ ENEMY: {
     enemy1MaxFrame:
         .byte $00
 
+    enemy2X:
+        .byte $00, $00
+    enemy2Y:
+        .byte $00
+    enemy2Type:
+        .byte $00
+    enemy2Frame:
+        .byte $00
+    enemy2MaxFrame:
+        .byte $00
+
     initialise: {
         ldx LEVEL
 
@@ -45,6 +56,28 @@ ENEMY: {
         lda TABLES.levelEnemy1Y, x
         sta enemy1Y
 
+        // Setup the second enemy
+        lda TABLES.levelEnemy2Type, x
+        sta enemy2Type
+        cmp #1
+        beq hedgehogLeft
+    hedgehogLeft:
+        lda #$62
+        sta enemy2Frame
+        sta enemy2MaxFrame
+        inc enemy2MaxFrame
+        sta SPRITE_POINTERS + 7
+        lda #BROWN
+        sta VIC.SPRITE_COLOUR_7
+
+        // Set sprite2 pos
+        lda TABLES.levelEnemy2XLo, x
+        sta enemy2X
+        lda TABLES.levelEnemy2XHi, x
+        sta enemy2X + 1
+        lda TABLES.levelEnemy2Y, x
+        sta enemy2Y
+
         rts
     }
 
@@ -72,6 +105,28 @@ ENEMY: {
         sta SPRITE_POINTERS + 6
 
     drawSecond:
+        // Set sprite position
+        lda enemy2X
+        sta VIC.SPRITE_7_X
+        setSpriteMsb(7, enemy2X)
+        lda enemy2Y
+        sta VIC.SPRITE_7_Y
+        lda.zp FRAME_COUNTER
+        and #%11111000  // every 8th frame
+        cmp FRAME_COUNTER   
+        bne done
+        // Set sprite frame
+        lda enemy2Frame
+        cmp enemy2MaxFrame
+        beq decFrame2
+        inc enemy2Frame
+        jmp !+
+    decFrame2:
+        dec enemy2Frame
+    !:
+        lda enemy2Frame
+        sta SPRITE_POINTERS + 7
+    done:
 
         rts
     }

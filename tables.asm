@@ -57,11 +57,11 @@ TABLES: {
     levelEnemy1Type:
         .byte $01
     levelEnemy2XLo:
-        .byte $10
+        .byte $20
     levelEnemy2XHi:
-        .byte $10
+        .byte $01
     levelEnemy2Y:
-        .byte $b4
+        .byte $bd
     levelEnemy2Type:
         .byte $01
 }
