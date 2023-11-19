@@ -53,6 +53,7 @@ loop:
     jsr PLAYER.drawPlayer
     jsr BUTTERFLY.moveButterfly
     jsr BUTTERFLY.drawButterfly
+    jsr ENEMY.moveEnemy
     jsr ENEMY.drawEnemy
     jsr PLAYER.collisionCheck
     jsr PLAYER.jumpAndFall
