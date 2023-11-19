@@ -47,4 +47,21 @@ TABLES: {
 
     butterflyTypes:
         .byte WHITE, CYAN, LIGHT_RED, PURPLE
+    
+    levelEnemy1XLo:
+        .byte $30
+    levelEnemy1XHi:
+        .byte $00
+    levelEnemy1Y:
+        .byte $bd
+    levelEnemy1Type:
+        .byte $01
+    levelEnemy2XLo:
+        .byte $10
+    levelEnemy2XHi:
+        .byte $10
+    levelEnemy2Y:
+        .byte $b4
+    levelEnemy2Type:
+        .byte $01
 }
