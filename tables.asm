@@ -64,4 +64,12 @@ TABLES: {
         .byte $bd
     levelEnemy2Type:
         .byte $01
+
+    hedgehogWalkLeft:
+        .byte $62, $63
+    __hedgehogWalkLeft:
+
+    hedgehogWalkRight:
+        .byte $64, $65
+    __hedgeHogWalkRight:
 }

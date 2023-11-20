@@ -288,6 +288,9 @@ PLAYER: {
         tya
         and #%00000100
         bne caughtButterfly1
+        tya
+        and #%00001000
+        beq noCatch
         lda #1
         jmp !+
     caughtButterfly1:

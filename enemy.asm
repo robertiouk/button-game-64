@@ -2,6 +2,8 @@ ENEMY: {
     .label MOVE_LEFT  = %00000001
     .label MOVE_RIGHT = %00000010
     .label HEDGEHOG_SPEED = $01
+    .label MIN_X = $1c
+    .label MAX_X = $3c
 
     enemy1X:
         .byte $00, $00
@@ -9,9 +11,11 @@ ENEMY: {
         .byte $00
     enemy1Type:
         .byte $00
+    enemy1LeftTable:
+        .byte $00, $00
+    enemy1RightTable:
+        .byte $00, $00
     enemy1Frame:
-        .byte $00
-    enemy1MaxFrame:
         .byte $00
     enemy1State:
         .byte $00
@@ -24,9 +28,11 @@ ENEMY: {
         .byte $00
     enemy2Type:
         .byte $00
+    enemy2LeftTable:
+        .byte $00, $00
+    enemy2RightTable:
+        .byte $00, $00
     enemy2Frame:
-        .byte $00
-    enemy2MaxFrame:
         .byte $00
     enemy2State:
         .byte $00
@@ -52,10 +58,16 @@ ENEMY: {
         cmp #1
         beq hedgehogRight
     hedgehogRight:
-        lda #$64
+        lda TABLES.hedgehogWalkLeft
+        sta enemy1LeftTable
+        lda TABLES.hedgehogWalkLeft + 1
+        sta enemy1LeftTable + 1
+        lda TABLES.hedgehogWalkRight
+        sta enemy1RightTable
+        lda TABLES.hedgehogWalkRight + 1
+        sta enemy1RightTable + 1
+        lda #0
         sta enemy1Frame
-        sta enemy1MaxFrame
-        inc enemy1MaxFrame
         sta SPRITE_POINTERS + 6
         lda #BROWN
         sta VIC.SPRITE_COLOUR_6
@@ -78,10 +90,16 @@ ENEMY: {
         cmp #1
         beq hedgehogLeft
     hedgehogLeft:
-        lda #$62
+        lda TABLES.hedgehogWalkLeft
+        sta enemy2LeftTable
+        lda TABLES.hedgehogWalkLeft + 1
+        sta enemy2LeftTable + 1
+        lda TABLES.hedgehogWalkRight
+        sta enemy2RightTable
+        lda TABLES.hedgehogWalkRight + 1
+        sta enemy2RightTable + 1
+        lda #0
         sta enemy2Frame
-        sta enemy2MaxFrame
-        inc enemy2MaxFrame
         sta SPRITE_POINTERS + 7
         lda #BROWN
         sta VIC.SPRITE_COLOUR_7
@@ -113,16 +131,26 @@ ENEMY: {
         cmp FRAME_COUNTER   
         bne drawSecond
         // Set sprite frame
+        lda enemy1State
+        and #MOVE_LEFT
+        beq drawRight1
+    drawLeft1:
+        ldx enemy1Frame
+        lda enemy1LeftTable, x
+        jmp drawFrame
+    drawRight1:
+        ldx enemy1Frame
+        lda enemy1RightTable, x
+    drawFrame:
+        sta SPRITE_POINTERS + 6
+    incFrame:
         lda enemy1Frame
-        cmp enemy1MaxFrame
+        cmp #1
         beq decFrame
         inc enemy1Frame
-        jmp !+
+        jmp drawSecond
     decFrame:
         dec enemy1Frame
-    !:
-        lda enemy1Frame
-        sta SPRITE_POINTERS + 6
 
     drawSecond:
         // Set sprite position
@@ -136,16 +164,27 @@ ENEMY: {
         cmp FRAME_COUNTER   
         bne done
         // Set sprite frame
+        lda enemy2State
+        and #MOVE_LEFT
+        beq drawRight2
+    drawLeft2:
+        ldx enemy2Frame
+        lda enemy2LeftTable, x
+        jmp drawFrame2
+    drawRight2:
+        ldx enemy2Frame
+        lda enemy2RightTable, x
+    drawFrame2:
+        sta SPRITE_POINTERS + 7
+    incFrame2:
         lda enemy2Frame
-        cmp enemy2MaxFrame
+        cmp #1
         beq decFrame2
         inc enemy2Frame
-        jmp !+
+        jmp done
     decFrame2:
         dec enemy2Frame
-    !:
-        lda enemy2Frame
-        sta SPRITE_POINTERS + 7
+
     done:
 
         rts
@@ -212,6 +251,16 @@ ENEMY: {
         lda (xPos), y
         sbc #0
         sta (xPos), y
+        bne !+
+        ldy #0
+        lda (xPos), y
+        cmp #MIN_X
+        bcs !+
+        lda (state), y
+        and #[255 - MOVE_LEFT]
+        ora #MOVE_RIGHT
+        sta (state), y
+    !:
         jmp done
     right:
         lda (state), y
@@ -225,6 +274,15 @@ ENEMY: {
         lda (xPos), y
         adc #0
         sta (xPos), y
+        beq done
+        ldy #0
+        lda (xPos), y
+        cmp #MAX_X
+        bcc done
+        lda (state), y
+        and #[255 - MOVE_RIGHT]
+        ora #MOVE_LEFT
+        sta (state), y
     done:
         lda currentEnemy
         beq !+

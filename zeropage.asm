@@ -24,6 +24,7 @@
 .label VECTOR2 = $17
 .label VECTOR3 = $19
 .label VECTOR4 = $1b
+.label VECTOR5 = $1d
 
 // Current level
-.label LEVEL = $1c
+.label LEVEL = $1f
