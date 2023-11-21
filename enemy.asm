@@ -1,12 +1,12 @@
 ENEMY: {
     .label MOVE_LEFT  = %00000001
     .label MOVE_RIGHT = %00000010
-    .label HEDGEHOG_SPEED = $01
+    .label HEDGEHOG_SPEED = $7f
     .label MIN_X = $1c
     .label MAX_X = $3c
 
     enemy1X:
-        .byte $00, $00
+        .byte $00, $00, $00
     enemy1Y:
         .byte $00
     enemy1Type:
@@ -23,7 +23,7 @@ ENEMY: {
         .byte $00
 
     enemy2X:
-        .byte $00, $00
+        .byte $00, $00, $00
     enemy2Y:
         .byte $00
     enemy2Type:
@@ -74,9 +74,9 @@ ENEMY: {
         
         // Set sprite1 pos
         lda TABLES.levelEnemy1XLo, x
-        sta enemy1X
-        lda TABLES.levelEnemy1XHi, x
         sta enemy1X + 1
+        lda TABLES.levelEnemy1XHi, x
+        sta enemy1X + 2
         lda TABLES.levelEnemy1Y, x
         sta enemy1Y
         lda #MOVE_RIGHT
@@ -106,9 +106,9 @@ ENEMY: {
 
         // Set sprite2 pos
         lda TABLES.levelEnemy2XLo, x
-        sta enemy2X
-        lda TABLES.levelEnemy2XHi, x
         sta enemy2X + 1
+        lda TABLES.levelEnemy2XHi, x
+        sta enemy2X + 2
         lda TABLES.levelEnemy2Y, x
         sta enemy2Y
         lda #MOVE_LEFT
@@ -121,9 +121,9 @@ ENEMY: {
 
     drawEnemy: {
         // Set sprite position
-        lda enemy1X
+        lda enemy1X + 1
         sta VIC.SPRITE_6_X
-        setSpriteMsb(6, enemy1X)
+        setSpriteMsb(6, enemy1X + 1)
         lda enemy1Y
         sta VIC.SPRITE_6_Y
         lda.zp FRAME_COUNTER
@@ -154,9 +154,9 @@ ENEMY: {
 
     drawSecond:
         // Set sprite position
-        lda enemy2X
+        lda enemy2X + 1
         sta VIC.SPRITE_7_X
-        setSpriteMsb(7, enemy2X)
+        setSpriteMsb(7, enemy2X + 1)
         lda enemy2Y
         sta VIC.SPRITE_7_Y
         lda.zp FRAME_COUNTER
@@ -251,11 +251,16 @@ ENEMY: {
         lda (xPos), y
         sbc #0
         sta (xPos), y
+        iny 
+        lda (xPos), y
+        sbc #0
+        sta (xPos), y
         bne !+
-        ldy #0
+        ldy #1
         lda (xPos), y
         cmp #MIN_X
         bcs !+
+        ldy #0
         lda (state), y
         and #[255 - MOVE_LEFT]
         ora #MOVE_RIGHT
@@ -274,11 +279,16 @@ ENEMY: {
         lda (xPos), y
         adc #0
         sta (xPos), y
+        iny
+        lda (xPos), y
+        adc #0
+        sta (xPos), y
         beq done
-        ldy #0
+        ldy #1
         lda (xPos), y
         cmp #MAX_X
         bcc done
+        ldy #0
         lda (state), y
         and #[255 - MOVE_RIGHT]
         ora #MOVE_LEFT
