@@ -1,4 +1,9 @@
 BUTTERFLY: {
+    .label STATE_CAUGHT    = %00000001
+    .label STATE_FALL_UP   = %00000010
+    .label STATE_FALL_DOWN = %00000100
+    .label STATE_SPAWNED   = %00001000
+
     yFloor:
         .byte $b4
     yCeiling:
@@ -27,6 +32,8 @@ BUTTERFLY: {
         .byte $5e       // 40 = 1e
     butterfly1Type:
         .byte $00
+    butterfly1State:
+        .byte $00
 
     butterfly2AccX:
         .byte $00
@@ -38,9 +45,14 @@ BUTTERFLY: {
         .byte $61 
     butterfly2Type:
         .byte $00
+    butterfly2State:
+        .byte $00
 
     currentButterfly:
         .byte $00
+
+    shell:
+        .byte $98
 
     initialise: {
         lda butterfly1Frame
@@ -199,6 +211,13 @@ BUTTERFLY: {
         lda.zp FRAME_COUNTER
         and #3
         bne drawSecond
+        // First, check if spawned. If so then clear caught / spawned flags
+        lda butterfly1State
+        cmp #[STATE_SPAWNED + STATE_CAUGHT]
+        bne setFrame
+        lda #0
+        sta butterfly1State
+    setFrame:
         // Set sprite frame
         lda butterfly1Frame
         cmp #$5f
@@ -220,6 +239,13 @@ BUTTERFLY: {
         lda.zp FRAME_COUNTER
         and #3
         bne done
+        // First, check if spawned. If so then clear caught / spawned flags
+        lda butterfly2State
+        cmp #[STATE_SPAWNED + STATE_CAUGHT]
+        bne setFrame2
+        lda #0
+        sta butterfly2State
+    setFrame2:
         // Set sprite frame
         lda butterfly2Frame
         cmp #$61
@@ -238,6 +264,9 @@ BUTTERFLY: {
 
     moveButterfly: {
     butterfly1:
+        lda butterfly1State
+        and #STATE_CAUGHT
+        bne butterfly2
         // Move butterfly 1 to the right
         lda butterfly1X
         clc
@@ -258,6 +287,9 @@ BUTTERFLY: {
         sta currentButterfly
         jsr pickNewButterfly
     butterfly2:
+        lda butterfly2State
+        and #STATE_CAUGHT
+        bne moveY
         lda butterfly2X
         sec
         sbc butterfly2AccX
@@ -277,7 +309,11 @@ BUTTERFLY: {
         sta currentButterfly
         jsr pickNewButterfly
     moveY:
-        jsr moveSpritesY
+        lda #0
+        sta currentButterfly
+        jsr moveSpriteY
+        inc currentButterfly
+        jsr moveSpriteY
     checkFinishedFrames:
         dec butterfly1MovementFrames
         lda butterfly1MovementFrames
@@ -296,13 +332,11 @@ BUTTERFLY: {
         rts
     }
 
-    moveSpritesY: {
+    moveSpriteY: {
         .var yPos = VECTOR1
         .var yAcc = VECTOR2
 
-        lda #1
-        sta currentButterfly
-    moveNext:
+        lda currentButterfly
         beq move1
     move2:
         lda #<butterfly2Y
@@ -359,11 +393,57 @@ BUTTERFLY: {
         sbc #0
         sta (yPos), y 
     done:
+
+        rts
+    }
+
+    catchButterfly: {
+        .var type = VECTOR1
+        .var state = VECTOR2
+
         lda currentButterfly
-        beq !+
-        dec currentButterfly
-        jmp moveNext
-    !:
+        beq getType1
+    getType2:
+        lda #<butterfly2Type
+        sta type
+        lda #>butterfly2Type
+        sta type + 1
+        lda #<butterfly2State
+        sta state
+        lda #>butterfly2State
+        sta state + 1
+        jmp setupDone
+    getType1:
+        lda #<butterfly1Type
+        sta type
+        lda #>butterfly1Type
+        sta type + 1
+        lda #<butterfly1State
+        sta state
+        lda #>butterfly1State
+        sta state + 1
+    setupDone:
+
+        ldy #0
+        // Set butterfly as caught
+        lda (state), y
+        ora #STATE_CAUGHT
+        sta (state), y
+
+        // Check type of butterfly caught
+        lda (type), y
+        cmp #1
+        beq noGift
+        // Drop gift
+        jmp done
+    noGift:
+        // Set spawned state before picking new butterfly or vectors will get blatted
+        lda (state), y
+        ora #STATE_SPAWNED
+        sta (state), y
+        // Pick new butterfly
+        jsr pickNewButterfly
+    done:
 
         rts
     }

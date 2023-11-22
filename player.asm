@@ -291,13 +291,20 @@ PLAYER: {
         tya
         and #%00001000
         beq noCatch
+    caughtButterfly2:
+        lda BUTTERFLY.butterfly2State
+        and #BUTTERFLY.STATE_CAUGHT
+        bne noCatch
         lda #1
         jmp !+
     caughtButterfly1:
+        lda BUTTERFLY.butterfly1State
+        and #BUTTERFLY.STATE_CAUGHT
+        bne noCatch
         lda #0
     !:
         sta BUTTERFLY.currentButterfly
-        jsr BUTTERFLY.pickNewButterfly
+        jsr BUTTERFLY.catchButterfly
     noCatch:
         rts
     }
