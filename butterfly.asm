@@ -2,7 +2,7 @@ BUTTERFLY: {
     .label STATE_CAUGHT    = %00000001
     .label STATE_FALL_UP   = %00000010
     .label STATE_FALL_DOWN = %00000100
-    .label STATE_SPAWNED   = %00001000
+ //   .label STATE_SPAWNED   = %00001000
 
     yFloor:
         .byte $b4
@@ -12,6 +12,10 @@ BUTTERFLY: {
         .byte $12
     xMax:
         .byte $60
+    xLeftSpawn:
+        .byte $0f
+    xRightSpawn:
+        .byte $46
 
     butterfly1Y:
         .byte $00, $00
@@ -211,13 +215,6 @@ BUTTERFLY: {
         lda.zp FRAME_COUNTER
         and #3
         bne drawSecond
-        // First, check if spawned. If so then clear caught / spawned flags
-        lda butterfly1State
-        cmp #[STATE_SPAWNED + STATE_CAUGHT]
-        bne setFrame
-        lda #0
-        sta butterfly1State
-    setFrame:
         // Set sprite frame
         lda butterfly1Frame
         cmp #$5f
@@ -239,13 +236,6 @@ BUTTERFLY: {
         lda.zp FRAME_COUNTER
         and #3
         bne done
-        // First, check if spawned. If so then clear caught / spawned flags
-        lda butterfly2State
-        cmp #[STATE_SPAWNED + STATE_CAUGHT]
-        bne setFrame2
-        lda #0
-        sta butterfly2State
-    setFrame2:
         // Set sprite frame
         lda butterfly2Frame
         cmp #$61
@@ -264,9 +254,6 @@ BUTTERFLY: {
 
     moveButterfly: {
     butterfly1:
-        lda butterfly1State
-        and #STATE_CAUGHT
-        bne butterfly2
         // Move butterfly 1 to the right
         lda butterfly1X
         clc
@@ -278,6 +265,17 @@ BUTTERFLY: {
         lda butterfly1X + 2
         adc #0
         sta butterfly1X + 2
+        // Check if spawned. If so then clear caught / spawned flags
+        lda butterfly1State
+        and #[STATE_CAUGHT]
+        beq checkRightLimit
+        lda butterfly1X + 1
+        cmp xLeftSpawn
+        bcc checkRightLimit
+        lda #0
+        sta butterfly1State
+    checkRightLimit:
+        lda butterfly1X + 2
         beq butterfly2
         // Check if off the end of the screen (right)
         lda butterfly1X + 1
@@ -287,9 +285,6 @@ BUTTERFLY: {
         sta currentButterfly
         jsr pickNewButterfly
     butterfly2:
-        lda butterfly2State
-        and #STATE_CAUGHT
-        bne moveY
         lda butterfly2X
         sec
         sbc butterfly2AccX
@@ -300,6 +295,17 @@ BUTTERFLY: {
         lda butterfly2X + 2
         sbc #0
         sta butterfly2X + 2
+        // Check if spawned. If so then clear caught / spawned flags
+        lda butterfly2State
+        and #[STATE_CAUGHT]
+        beq checkLeftLimit
+        lda butterfly2X + 1
+        cmp xRightSpawn
+        bcs checkLeftLimit
+        lda #0
+        sta butterfly2State
+    checkLeftLimit:
+        lda butterfly2X + 2
         bne moveY
         // Check if off the end of the screen (left)
         lda butterfly2X + 1
@@ -437,14 +443,11 @@ BUTTERFLY: {
         // Drop gift
         jmp done
     noGift:
-        // Set spawned state before picking new butterfly or vectors will get blatted
-        lda (state), y
-        ora #STATE_SPAWNED
-        sta (state), y
+
+    done:
         // Pick new butterfly
         jsr pickNewButterfly
-    done:
-
+ 
         rts
     }
 }
