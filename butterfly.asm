@@ -1,8 +1,5 @@
 BUTTERFLY: {
     .label STATE_CAUGHT    = %00000001
-    .label STATE_FALL_UP   = %00000010
-    .label STATE_FALL_DOWN = %00000100
- //   .label STATE_SPAWNED   = %00001000
 
     yFloor:
         .byte $b4
@@ -64,7 +61,6 @@ BUTTERFLY: {
         lda butterfly2Frame
         sta SPRITE_POINTERS + 3
 
-        // Sprite 2 is reserved for second player
         lda VIC.SPRITE_ENABLE
         ora #%00001100
         sta VIC.SPRITE_ENABLE
@@ -439,11 +435,10 @@ BUTTERFLY: {
         // Check type of butterfly caught
         lda (type), y
         cmp #1
-        beq noGift
-        // Drop gift
-        jmp done
-    noGift:
-
+        beq done
+        // Drop pickup
+        // Are there any pickups available?
+        jsr PICKUP.generatePickup   
     done:
         // Pick new butterfly
         jsr pickNewButterfly

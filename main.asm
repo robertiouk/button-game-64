@@ -6,6 +6,7 @@ BasicUpstart2(main)
 #import "macros.asm"
 #import "maploader.asm"
 #import "memory.asm"
+#import "pickup.asm"
 #import "player.asm"
 #import "tables.asm"
 #import "utils.asm"
@@ -41,6 +42,7 @@ main:
     jsr MAPLOADER.drawMap
     jsr PLAYER.initialise
     jsr BUTTERFLY.initialise
+    jsr PICKUP.initialise
     lda #0
     sta.zp LEVEL
     jsr ENEMY.initialise
