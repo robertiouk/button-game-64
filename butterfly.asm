@@ -438,6 +438,8 @@ BUTTERFLY: {
         beq done
         // Drop pickup
         sta PICKUP.caughtType
+        lda currentButterfly
+        sta PICKUP.caughtButterfly
         jsr PICKUP.generatePickup   
     done:
         // Pick new butterfly

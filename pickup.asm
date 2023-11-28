@@ -25,6 +25,8 @@ PICKUP: {
     
     caughtType:
         .byte $00
+    caughtButterfly:
+        .byte $00
 
     initialise: {
         lda VIC.SPRITE_ENABLE
@@ -56,21 +58,24 @@ PICKUP: {
         sta VIC.SPRITE_COLOUR_4
 
         // Set the position
+        lda caughtButterfly
         beq butterfly1PosFirst
         lda BUTTERFLY.butterfly2X + 1
         sta pickup1X
         lda BUTTERFLY.butterfly2X + 2
         sta pickup1X + 1
-        lda BUTTERFLY.butterfly2Y
+        lda BUTTERFLY.butterfly2Y + 1
         sta pickup1Y
+        jmp setStateFirst
     butterfly1PosFirst:
         lda BUTTERFLY.butterfly1X + 1
         sta pickup1X
         lda BUTTERFLY.butterfly1X + 2
         sta pickup1X + 1
-        lda BUTTERFLY.butterfly1Y
+        lda BUTTERFLY.butterfly1Y + 1
         sta pickup1Y
 
+    setStateFirst:
         lda #STATE_FALL_UP
         sta pickup1State
 
@@ -94,21 +99,24 @@ PICKUP: {
         sta VIC.SPRITE_COLOUR_5
 
         // Set the position
+        lda caughtButterfly
         beq butterfly1PosSecond
         lda BUTTERFLY.butterfly2X + 1
         sta pickup2X
         lda BUTTERFLY.butterfly2X + 2
         sta pickup2X + 1
-        lda BUTTERFLY.butterfly2Y
+        lda BUTTERFLY.butterfly2Y + 1
         sta pickup2Y
+        jmp setStateSecond
     butterfly1PosSecond:
         lda BUTTERFLY.butterfly1X + 1
         sta pickup2X
         lda BUTTERFLY.butterfly1X + 2
         sta pickup2X + 1
-        lda BUTTERFLY.butterfly1Y
+        lda BUTTERFLY.butterfly1Y + 1
         sta pickup2Y
 
+    setStateSecond:
         lda #STATE_FALL_UP
         sta pickup2State
 
@@ -134,7 +142,6 @@ PICKUP: {
         .var current = TEMP1
 
         // Before we do anything check that there is a moveable pickup
-.break
         lda pickup1State
         and #[STATE_FALL_DOWN + STATE_FALL_UP]
         bne start
@@ -181,12 +188,48 @@ PICKUP: {
         beq done
 
         // Pickup is falling, so move it
-
+        lda state
+        cmp #STATE_FALL_UP
+        bne fallDown
+    fallUp:
+        // Pickup will pop upwards before falling down
+    fallDown:
+        // Move pickup down
     done:
         lda current
         beq finished
         dec current
         jmp setupNext
+    finished:
+
+        rts
+    }
+
+    drawPickup: {
+        lda activePickups
+        and #%00000011
+        beq finished
+
+        lda activePickups
+        and #%00000001
+        beq drawSecond
+    drawFirst:
+        lda pickup1X
+        sta VIC.SPRITE_4_X
+        setSpriteMsb(4, pickup1X)
+
+        lda pickup1Y
+        sta VIC.SPRITE_4_Y
+    drawSecond:
+        lda activePickups
+        and #%00000010
+        beq finished
+        lda pickup2X
+        sta VIC.SPRITE_5_X
+        setSpriteMsb(5, pickup2X)
+
+        lda pickup2Y
+        sta VIC.SPRITE_5_Y
     finished:
 
         rts

@@ -56,6 +56,7 @@ loop:
     jsr BUTTERFLY.moveButterfly
     jsr BUTTERFLY.drawButterfly
     jsr PICKUP.movePickup
+    jsr PICKUP.drawPickup
     jsr ENEMY.moveEnemy
     jsr ENEMY.drawEnemy
     jsr PLAYER.collisionCheck
