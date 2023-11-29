@@ -143,6 +143,23 @@ PICKUP: {
         rts
     }
 
+    collisionCheck: {
+        // Before we do anything check that there is a moveable pickup
+        lda pickup1State
+        cmp #STATE_FALL_DOWN
+        bne checkSecond
+        // Do collision check for pickup 1
+
+    checkSecond:
+        lda pickup2State
+        cmp #STATE_FALL_DOWN
+        bne done
+        // Do collision check for pickup 2
+        
+    done:
+        rts
+    }
+
     movePickup: {
         .var xPos = VECTOR1
         .var yPos = VECTOR2
