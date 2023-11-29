@@ -73,10 +73,10 @@ TABLES: {
         .byte $64, $65
     __hedgeHogWalkRight:
 
-    butterflyFall:
+    pickupFall:
         .byte $03, $02, $02, $02, $01 
         .byte $01, $00, $00, $01, $02
         .byte $03, $03, $04, $04, $05
         .byte $05, $06, $07   
-    __butterflyFall:
+    __pickupFall:
 }

@@ -9,12 +9,20 @@ PICKUP: {
         .byte $00
     pickup1State:
         .byte $00
+    pickup1FallIndex:
+        .byte $00
+    pickup1CollisionPoint:
+        .byte $00
 
     pickup2X:
         .byte $00, $00
     pickup2Y:
         .byte $00
     pickup2State:
+        .byte $00
+    pickup2FallIndex:
+        .byte $00
+    pickup2CollisionPoint:
         .byte $00
 
     dropFrame:
@@ -139,6 +147,7 @@ PICKUP: {
         .var xPos = VECTOR1
         .var yPos = VECTOR2
         .var state = VECTOR3
+        .var fallIndex = VECTOR4
         .var current = TEMP1
 
         // Before we do anything check that there is a moveable pickup
@@ -147,7 +156,8 @@ PICKUP: {
         bne start
         lda pickup2State
         and #[STATE_FALL_DOWN + STATE_FALL_UP]
-        beq finished
+        bne start
+        jmp finished
     start:
         lda #1
         sta current       
@@ -167,6 +177,10 @@ PICKUP: {
         sta state
         lda #>pickup2State
         sta state + 1
+        lda #<pickup2FallIndex
+        sta fallIndex
+        lda #>pickup2FallIndex
+        sta fallIndex + 1
         jmp doneSetup
     setupFirst:
         lda #<pickup1X
@@ -181,20 +195,63 @@ PICKUP: {
         sta state
         lda #>pickup1State
         sta state + 1
+        lda #<pickup1FallIndex
+        sta fallIndex
+        lda #>pickup1FallIndex
+        sta fallIndex + 1
     doneSetup:
-
-        lda state
-        and #[STATE_FALL_DOWN + STATE_FALL_DOWN]
+        ldy #0
+        lda (state), y
+        and #[STATE_FALL_UP + STATE_FALL_DOWN]
         beq done
 
         // Pickup is falling, so move it
-        lda state
+        lda (state), y
         cmp #STATE_FALL_UP
         bne fallDown
     fallUp:
         // Pickup will pop upwards before falling down
+        ldy #0
+        lda (fallIndex), y
+        tax
+        lda (yPos), y
+        sec
+        sbc TABLES.pickupFall, x
+        sta (yPos), y
+        
+        // Check fall state
+        lda TABLES.pickupFall, x
+        bne !+
+        // Hit 0, start to fall down
+        lda #STATE_FALL_DOWN
+        sta (state), y
+    !:
+        lda (fallIndex), y
+        clc
+        adc #1
+        sta (fallIndex), y
+        jmp done
     fallDown:
         // Move pickup down
+        ldy #0
+        lda (fallIndex), y
+        tax
+        lda (yPos), y
+        clc
+        adc TABLES.pickupFall, x
+        sta (yPos), y
+
+        // Check for floor collision
+
+
+        // Check fall state
+        txa
+        cmp #[TABLES.__pickupFall - TABLES.pickupFall - 1]
+        beq done
+        lda (fallIndex), y
+        clc
+        adc #1
+        sta (fallIndex), y
     done:
         lda current
         beq finished
@@ -231,6 +288,111 @@ PICKUP: {
         lda pickup2Y
         sta VIC.SPRITE_5_Y
     finished:
+
+        rts
+    }
+    
+    // Grab the top left corner of sprite and store in zero page
+    getCollisionPoint: {
+        // a register contains the pickup to assess
+        // x register contains x offset (half coordinates)
+        // y register contains y offset
+
+        // Setup variables
+        .var xPixelOffset = TEMP1
+        .var yPixelOffset = TEMP2
+        .var pickupPosition = TEMP3 // uses both TEMP3 & 4 - Lo/Hi
+        .var xPos = VECTOR1
+        .var yPos = VECTOR2
+        .var xBorderOffset = 22
+        .var yBorderOffset = 49
+        stx xPixelOffset
+        sty yPixelOffset
+
+        cmp #1
+        beq setup1
+    setup2:
+        lda #<pickup2X
+        sta xPos
+        lda #>pickup2X
+        sta xPos + 1
+        lda #<pickup2Y
+        sta yPos
+        lda #>pickup2Y
+        sta yPos + 1
+        jmp setupComplete
+    setup1:
+        lda #<pickup1X
+        sta xPos
+        lda #>pickup1X
+        sta xPos + 1
+        lda #<pickup1Y
+        sta yPos
+        lda #>pickup1Y
+        sta yPos + 1
+    setupComplete:
+
+        // Calculate x & y in screen space
+        ldy #00
+        lda (xPos), y
+        sta pickupPosition
+        iny
+        lda (xPos), y
+        sta pickupPosition + 1
+        // Convert from 1:1/16 to 1:1
+        lda pickupPosition + 1  // Hi
+        bne !+          // If > 0 skip
+        lda pickupPosition      // Lo
+        cmp #xBorderOffset         // Left border edge
+        bcs !+          // If it's > border edge do nothing
+        lda #xBorderOffset         // Assume it's at the edge of the screen
+        sta pickupPosition
+    !:
+        lda pickupPosition
+        clc
+        adc xPixelOffset
+        sta pickupPosition
+        lda pickupPosition + 1
+        adc #0
+        sta pickupPosition + 1
+        // Done 16 bit addition ^
+        lda pickupPosition
+        sec
+        sbc #xBorderOffset
+        sta pickupPosition
+        lda pickupPosition + 1
+        sbc #0
+        sta pickupPosition + 1
+
+        // We now have a value between 0 and 160. We need do turn into 
+        // a value between 0 and 40, so divide by 4.
+        lda pickupPosition
+        lsr pickupPosition + 1
+        ror 
+        lsr pickupPosition + 1
+        ror 
+        lsr pickupPosition + 1
+        ror 
+
+        tax
+
+        lda yPos
+        
+        cmp #yBorderOffset         // Top of screen
+        bcs !+
+        lda #yBorderOffset
+    !:
+        clc
+        adc yPixelOffset
+        sec 
+        sbc #yBorderOffset
+        // Divide by 8 because while x is stored in half values, y
+        // is stored in quarter values
+        lsr             
+        lsr
+        lsr
+
+        tay
 
         rts
     }
