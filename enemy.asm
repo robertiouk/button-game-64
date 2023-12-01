@@ -21,6 +21,8 @@ ENEMY: {
         .byte $00
     enemy1Speed:
         .byte $00
+    pickup1Collision:
+        .byte $00
 
     enemy2X:
         .byte $00, $00, $00
@@ -37,6 +39,8 @@ ENEMY: {
     enemy2State:
         .byte $00
     enemy2Speed:
+        .byte $00
+    pickup2Collision:
         .byte $00
 
     initialise: {

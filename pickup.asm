@@ -2,6 +2,7 @@ PICKUP: {
     .label STATE_FALL_UP   = %00000010
     .label STATE_FALL_DOWN = %00000100
     .label STATE_LANDED    = %00001000
+    .label COLLISION_SOLID = %00010000
 
     pickup1X:
         .byte $00, $00
@@ -149,12 +150,34 @@ PICKUP: {
         cmp #STATE_FALL_DOWN
         bne checkSecond
         // Do collision check for pickup 1
+        lda #0
+        ldx #10      // Left double-pixel location / 2
+        ldy #25      // y Offset. This should be halved for small sprite (#24)
+        jsr getCollisionPoint
+        jsr UTILS.getCharacterAt
+        //tax
+        //lda #11
+        //sta (TEMP1), y
+        //txa
+        tax
+        lda ATTR_DATA, x
+        and #$f0
+        sta pickup1CollisionPoint
 
     checkSecond:
         lda pickup2State
         cmp #STATE_FALL_DOWN
         bne done
         // Do collision check for pickup 2
+        lda #1
+        ldx #10      // Left foot double-pixel location / 2
+        ldy #25      // y Offset. This should be halved for small sprite (#24)
+        jsr getCollisionPoint
+        jsr UTILS.getCharacterAt
+        tax
+        lda ATTR_DATA, x
+        and #$f0
+        sta pickup2CollisionPoint
         
     done:
         rts
@@ -165,6 +188,7 @@ PICKUP: {
         .var yPos = VECTOR2
         .var state = VECTOR3
         .var fallIndex = VECTOR4
+        .var collision = VECTOR5
         .var current = TEMP1
 
         // Before we do anything check that there is a moveable pickup
@@ -198,6 +222,10 @@ PICKUP: {
         sta fallIndex
         lda #>pickup2FallIndex
         sta fallIndex + 1
+        lda #<pickup2CollisionPoint
+        sta collision
+        lda #>pickup2CollisionPoint
+        sta collision + 1
         jmp doneSetup
     setupFirst:
         lda #<pickup1X
@@ -216,6 +244,10 @@ PICKUP: {
         sta fallIndex
         lda #>pickup1FallIndex
         sta fallIndex + 1
+        lda #<pickup1CollisionPoint
+        sta collision
+        lda #>pickup1CollisionPoint
+        sta collision + 1
     doneSetup:
         ldy #0
         lda (state), y
@@ -249,6 +281,26 @@ PICKUP: {
         sta (fallIndex), y
         jmp done
     fallDown:
+        // Check for floor collision
+        lda (collision), y
+        cmp #COLLISION_SOLID
+        bne !+
+        lda #STATE_LANDED
+        sta (state), y
+        lda #0
+        sta (fallIndex), y
+        // Snap to lower precision to snap to floor.
+        // Floor will be multiple of 8, e.g., 80.
+        // Worst case Y will by 7
+        lda (yPos), y
+        and #%11111000 // is now a multiple of 8
+        ora #%00000101  // ora 101 worked well for small sprite
+        sta (yPos), y
+        //inc (yPos), y
+
+        jmp done
+    !:
+
         // Move pickup down
         ldy #0
         lda (fallIndex), y
@@ -257,9 +309,6 @@ PICKUP: {
         clc
         adc TABLES.pickupFall, x
         sta (yPos), y
-
-        // Check for floor collision
-
 
         // Check fall state
         txa
@@ -326,7 +375,7 @@ PICKUP: {
         stx xPixelOffset
         sty yPixelOffset
 
-        cmp #1
+        cmp #0
         beq setup1
     setup2:
         lda #<pickup2X
@@ -393,7 +442,8 @@ PICKUP: {
 
         tax
 
-        lda yPos
+        ldy #0
+        lda (yPos), y
         
         cmp #yBorderOffset         // Top of screen
         bcs !+

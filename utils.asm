@@ -18,13 +18,12 @@ UTILS: {
         tay
         lda (collisionVector), y
 
-        /*////// DEBUG /////
+        /*///// DEBUG /////
         tax
-        lda #$16
+        lda #11
         sta (collisionVector), y
         txa
         /////////////////*/
-
         rts  
     }
 }
