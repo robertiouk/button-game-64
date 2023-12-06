@@ -296,7 +296,6 @@ PICKUP: {
         and #%11111000 // is now a multiple of 8
         ora #%00000101  // ora 101 worked well for small sprite
         sta (yPos), y
-        //inc (yPos), y
 
         jmp done
     !:

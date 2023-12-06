@@ -447,6 +447,95 @@ BUTTERFLY: {
  
         rts
     }
+
+    checkCollision: {
+        .var playerX = VECTOR1
+        .var playerY = VECTOR2
+        .var butterflyX = VECTOR3
+        .var butterflyY = VECTOR4
+        .var xDelta = TEMP1
+        .var yDelta = TEMP2
+
+        lda PLAYER.currentPlayer
+        beq setupPlayer1
+        jmp playerDone
+    setupPlayer1:
+        lda #<PLAYER.player1X
+        sta playerX
+        lda #>PLAYER.player1X
+        sta playerX + 1
+        lda #<PLAYER.player1Y
+        sta playerY
+        lda #>PLAYER.player1Y
+        sta playerY + 1
+    playerDone:
+
+        lda currentButterfly
+        beq setupButterfly1
+    setupButterfly2:
+        lda #<butterfly2X
+        sta butterflyX
+        lda #>butterfly2X
+        sta butterflyX + 1
+        lda #<butterfly2Y
+        sta butterflyY
+        lda #>butterfly2Y
+        sta butterflyY + 1
+        jmp butterflyDone
+    setupButterfly1:
+        lda #<butterfly1X
+        sta butterflyX
+        lda #>butterfly1X
+        sta butterflyX + 1
+        lda #<butterfly1Y
+        sta butterflyY
+        lda #>butterfly1Y
+        sta butterflyY + 1
+    butterflyDone:
+
+        // Get x delta - are both MSBs set?
+        ldy #2
+        lda (butterflyX), y
+        dey
+        cmp (playerX), y
+        bne notEqual
+        // Now compare actual x pos
+        lda (butterflyX), y
+        ldy #0
+        sec
+        sbc (playerX), y
+        // We need the absolute value, so check negative
+        bpl absoluteX
+        eor #$ff
+        clc
+        adc #1
+    absoluteX:
+        cmp #14
+        bcs notEqual
+
+        // Get y delta
+        ldy #1
+        lda (butterflyY), y
+        dey
+        sec
+        sbc (playerY), y
+        // We need absolute value, so check negative
+        bpl absoluteY
+        eor #$ff
+        clc
+        adc #1
+    absoluteY:
+        cmp #24
+        bcs notEqual
+        // Collision detected
+        lda #1
+        jmp done
+    notEqual:
+        lda #0
+    done:       
+
+        rts
+    }
 }
 
 .macro pickNewYCoord(butterfly) {

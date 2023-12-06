@@ -19,13 +19,13 @@ PLAYER: {
 
     playersActive:
         .byte $00
-    player1_X:
+    player1X:
         .byte $a0, $00  // 1/16th pixel accuracy (Lo / Hi)
-    player1_Y:
+    player1Y:
         .byte $a8       // 1 pixel accuracy
-    player2_X:
+    player2X:
         .byte $80       // 1 pixel accuracy
-    player2_Y:
+    player2Y:
         .byte $bd       // 1 pixel accuracy  
     player1State:
         .byte $00
@@ -48,6 +48,9 @@ PLAYER: {
     defaultFrame:
         .byte $40       // dec 64
     jumpDirection:
+        .byte $00
+
+    currentPlayer:
         .byte $00
 
     initialise: {
@@ -147,11 +150,11 @@ PLAYER: {
 
     setPosition:
         // Set sprite position
-        lda player1_X
+        lda player1X
         sta VIC.SPRITE_0_X
-        setSpriteMsb(0, player1_X)
+        setSpriteMsb(0, player1X)
 
-        lda player1_Y
+        lda player1Y
         sta VIC.SPRITE_0_Y
 
         rts
@@ -198,12 +201,12 @@ PLAYER: {
         sta defaultFrame
 
         sec
-        lda player1_X
+        lda player1X
         sbc player1WalkSpeed
-        sta player1_X
-        lda player1_X + 1
+        sta player1X
+        lda player1X + 1
         sbc #0
-        sta player1_X + 1
+        sta player1X + 1
         jmp !done+
     !:
 
@@ -221,12 +224,12 @@ PLAYER: {
         sta defaultFrame
 
         clc
-        lda player1_X
+        lda player1X
         adc player1WalkSpeed
-        sta player1_X
-        lda player1_X + 1
+        sta player1X
+        lda player1X + 1
         adc #0
-        sta player1_X + 1
+        sta player1X + 1
     !:
 
     !done:
@@ -304,6 +307,8 @@ PLAYER: {
         lda #0
     !:
         sta BUTTERFLY.currentButterfly
+        jsr BUTTERFLY.checkCollision
+        beq noCatch
         jsr BUTTERFLY.catchButterfly
     noCatch:
         rts
@@ -325,10 +330,10 @@ PLAYER: {
 
         // Calculate x & y in screen space
         ldy #00
-        lda player1_X, y
+        lda player1X, y
         sta playerPosition
         iny
-        lda player1_X, y
+        lda player1X, y
         sta playerPosition + 1
         // Convert from 1:1/16 to 1:1
         lda playerPosition + 1  // Hi
@@ -367,7 +372,7 @@ PLAYER: {
 
         tax
 
-        lda player1_Y
+        lda player1Y
         
         cmp #yBorderOffset         // Top of screen
         bcs !+
@@ -408,11 +413,11 @@ PLAYER: {
         // Snap to lower precision to snap to floor.
         // Floor will be multiple of 8, e.g., 80.
         // Worst case Y will by 7
-        lda player1_Y
+        lda player1Y
         and #%11111000 // is now a multiple of 8
         ora #%00000111  // ora 101 worked well for small sprite
-        sta player1_Y
-        inc player1_Y
+        sta player1Y
+        inc player1Y
         jmp jumpCheck
     falling:
         // If not already falling then set fall state
@@ -428,10 +433,10 @@ PLAYER: {
         // If already falling then apply next fall frame
         lda player1JumpIndex
         tax
-        lda player1_Y
+        lda player1Y
         clc
         adc TABLES.jumpAndFallTable, x
-        sta player1_Y
+        sta player1Y
         // Proceed fall frame
         cpx #0
         beq jumpCheck   // Fall frame is max (zero)
@@ -446,10 +451,10 @@ PLAYER: {
         lda player1JumpIndex
         tax
         // Decrement Y by current frame
-        lda player1_Y
+        lda player1Y
         sec
         sbc TABLES.jumpAndFallTable, x
-        sta player1_Y
+        sta player1Y
         // Have we reached the final jump frame?
         inx
         stx player1JumpIndex
