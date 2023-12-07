@@ -98,9 +98,31 @@ PLAYER: {
         lda defaultFrame
         sta currentFrame
 
+        // Has player been hit?
+        lda player1State
+        and #STATE_HIT
+        beq drawNormalFrame
+        // Player is hit / alternate hit frame
+        lda FRAME_COUNTER
+        and #01
+        bne setPosition
+        lda SPRITE_POINTERS
+        cmp #90
+        beq flipLeft
+        lda #90
+        sta currentFrame
+        jmp setFrame
+    flipLeft:
+        lda #81
+        sta currentFrame
+        jmp setFrame
+
+    drawNormalFrame:
+        // Player not hit so draw normally
         lda player1State
         and #[STATE_WALK_LEFT + STATE_WALK_RIGHT + STATE_FALL + STATE_JUMP]
-        beq setFrame    // If neither of these then not walking
+        beq setFrame            // If neither of these then not walking or jumping
+    !:
         lda player1State
         and #[STATE_FALL + STATE_JUMP]
         beq walkFrame    // If either of these then don't set walk frame
