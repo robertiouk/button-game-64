@@ -26,6 +26,89 @@ UTILS: {
         /////////////////*/
         rts  
     }
+
+    checkPlayerSpriteCollision: {
+        .var playerX = VECTOR1
+        .var playerY = VECTOR2
+        .var otherX = VECTOR3
+        .var otherY = VECTOR4
+        .var collisionSide = VECTOR5
+        .var xDelta = TEMP1
+        .var yDelta = TEMP2
+        .var otherYOffset = TEMP3
+
+        lda PLAYER.currentPlayer
+        beq setupPlayer1
+        jmp playerDone
+    setupPlayer1:
+        lda #<PLAYER.player1X
+        sta playerX
+        lda #>PLAYER.player1X
+        sta playerX + 1
+        lda #<PLAYER.player1Y
+        sta playerY
+        lda #>PLAYER.player1Y
+        sta playerY + 1
+        lda #<PLAYER.player1SpriteCollisionSide
+        sta collisionSide
+        lda #>PLAYER.player1SpriteCollisionSide
+        sta collisionSide + 1
+    playerDone:
+
+        // Get x delta - are both MSBs set?
+        ldy #2
+        lda (otherX), y
+        dey
+        cmp (playerX), y
+        bne notEqual
+        // Now compare actual x pos
+        lda (otherX), y
+        ldy #0
+        sec
+        sbc (playerX), y
+        // We need the absolute value, so check negative
+        bmi !+
+        tax
+        lda #PLAYER.COLLISION_RIGHT
+        sta (collisionSide), y
+        txa
+        jmp absoluteX
+    !:
+        eor #$ff
+        clc
+        adc #1
+        tax
+        lda #PLAYER.COLLISION_LEFT
+        sta (collisionSide), y
+        txa
+    absoluteX:
+        cmp #14
+        bcs notEqual
+
+        // Get y delta
+        ldy otherYOffset
+        lda (otherY), y
+        ldy #0
+        sec
+        sbc (playerY), y
+        // We need absolute value, so check negative
+        bpl absoluteY
+        eor #$ff
+        clc
+        adc #1
+    absoluteY:
+        cmp #24
+        bcs notEqual
+        // Collision detected
+        lda #1
+        jmp done
+    notEqual:
+        lda #0
+    done:       
+
+        rts
+
+    }
 }
 
 .macro getRandom(lower, upper) {

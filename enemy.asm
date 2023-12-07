@@ -21,8 +21,6 @@ ENEMY: {
         .byte $00
     enemy1Speed:
         .byte $00
-    pickup1Collision:
-        .byte $00
 
     enemy2X:
         .byte $00, $00, $00
@@ -40,7 +38,8 @@ ENEMY: {
         .byte $00
     enemy2Speed:
         .byte $00
-    pickup2Collision:
+
+    collidingEnemy:
         .byte $00
 
     initialise: {
@@ -304,6 +303,41 @@ ENEMY: {
         lda currentEnemy
         jmp next
     !:
+
+        rts
+    }
+
+    checkCollision: {
+        .var enemyX = VECTOR3
+        .var enemyY = VECTOR4
+        .var otherYOffset = TEMP3
+
+        lda collidingEnemy
+        beq setupEnemy1
+    setupEnemy2:
+        lda #<enemy2X
+        sta enemyX
+        lda #>enemy2X
+        sta enemyX + 1
+        lda #<enemy2Y
+        sta enemyY
+        lda #>enemy2Y
+        sta enemyY + 1
+        jmp enemyDone
+    setupEnemy1:
+        lda #<enemy1X
+        sta enemyX
+        lda #>enemy1X
+        sta enemyX + 1
+        lda #<enemy1Y
+        sta enemyY
+        lda #>enemy1Y
+        sta enemyY + 1
+    enemyDone:
+
+        lda #0
+        sta otherYOffset
+        jsr UTILS.checkPlayerSpriteCollision
 
         rts
     }

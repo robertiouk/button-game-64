@@ -449,26 +449,9 @@ BUTTERFLY: {
     }
 
     checkCollision: {
-        .var playerX = VECTOR1
-        .var playerY = VECTOR2
         .var butterflyX = VECTOR3
         .var butterflyY = VECTOR4
-        .var xDelta = TEMP1
-        .var yDelta = TEMP2
-
-        lda PLAYER.currentPlayer
-        beq setupPlayer1
-        jmp playerDone
-    setupPlayer1:
-        lda #<PLAYER.player1X
-        sta playerX
-        lda #>PLAYER.player1X
-        sta playerX + 1
-        lda #<PLAYER.player1Y
-        sta playerY
-        lda #>PLAYER.player1Y
-        sta playerY + 1
-    playerDone:
+        .var otherYOffset = TEMP3
 
         lda currentButterfly
         beq setupButterfly1
@@ -492,9 +475,12 @@ BUTTERFLY: {
         lda #>butterfly1Y
         sta butterflyY + 1
     butterflyDone:
-
+    
+        lda #1
+        sta otherYOffset
+        jsr UTILS.checkPlayerSpriteCollision
         // Get x delta - are both MSBs set?
-        ldy #2
+      /*  ldy #2
         lda (butterflyX), y
         dey
         cmp (playerX), y
@@ -532,7 +518,7 @@ BUTTERFLY: {
         jmp done
     notEqual:
         lda #0
-    done:       
+    done:     */  
 
         rts
     }

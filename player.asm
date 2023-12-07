@@ -1,5 +1,7 @@
 PLAYER: {
     .label COLLISION_SOLID = %00010000
+    .label COLLISION_LEFT = $1
+    .label COLLISION_RIGHT = $2
 
     .label PLAYER_1 = %00000001
     .label PLAYER_2 = %00000010
@@ -43,6 +45,8 @@ PLAYER: {
     player1LeftCollision:
         .byte $00
     player1RightCollision:
+        .byte $00
+    player1SpriteCollisionSide:
         .byte $00
 
     defaultFrame:
@@ -278,17 +282,18 @@ PLAYER: {
         lda ATTR_DATA, x
         sta player1RightCollision
         
-        jsr checkButterflyCaught
+        jsr checkSpriteCollisions
 
         rts
     }
 
-    checkButterflyCaught: {
+    checkSpriteCollisions: {
         lda VIC.SPRITE_COLLISION
         tay
         and #%00000001
-        beq noCatch
+        beq noCollision
         tya
+        pha     // Store the collision value in the stack for now as it the vic register gets wiped
         and #%00000100
         bne caughtButterfly1
         tya
@@ -311,6 +316,28 @@ PLAYER: {
         beq noCatch
         jsr BUTTERFLY.catchButterfly
     noCatch:
+
+    pla
+
+    checkEnemyCollisions:
+        tay
+        and #%01000000
+        bne hitEnemy1
+        tya
+        and #%10000000
+        bne hitEnemy2
+        jmp noCollision
+    hitEnemy1:
+        lda #0
+        jmp damagePlayer
+    hitEnemy2:
+        lda #1
+    damagePlayer:
+        sta ENEMY.collidingEnemy
+        jsr ENEMY.checkCollision
+        beq noCollision
+    noCollision:
+
         rts
     }
 
