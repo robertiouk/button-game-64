@@ -10,6 +10,7 @@ PLAYER: {
     .label STATE_FALL       = %00000010
     .label STATE_WALK_LEFT  = %00000100
     .label STATE_WALK_RIGHT = %00001000
+    .label STATE_HIT        = %00010000
 
     .label JOY_UP = %00001
     .label JOY_DN = %00010
@@ -170,6 +171,14 @@ PLAYER: {
 
         // Clear the walking states
         lda player1State
+        and #STATE_HIT
+        beq !+
+        lda player1SpriteCollisionSide
+        cmp #COLLISION_LEFT
+        beq applyRight
+        jmp applyLeft
+    !:
+        lda player1State
         and #[255 - STATE_WALK_LEFT - STATE_WALK_RIGHT]     // $11110011
         sta player1State
 
@@ -195,7 +204,7 @@ PLAYER: {
         lda.zp JOY1_ZP
         and #JOY_LT
         bne !+
-
+    applyLeft:
         lda player1State
         ora #STATE_WALK_LEFT
         sta player1State
@@ -218,7 +227,7 @@ PLAYER: {
         lda.zp JOY1_ZP
         and #JOY_RT
         bne !+
-
+    applyRight:
         lda player1State
         ora #STATE_WALK_RIGHT
         sta player1State
@@ -336,6 +345,7 @@ PLAYER: {
         sta ENEMY.collidingEnemy
         jsr ENEMY.checkCollision
         beq noCollision
+        jsr playerHit
     noCollision:
 
         rts
@@ -445,6 +455,10 @@ PLAYER: {
         ora #%00000111  // ora 101 worked well for small sprite
         sta player1Y
         inc player1Y
+        // Player will not be hit now
+        lda player1State
+        and #[255 - STATE_HIT]
+        sta player1State
         jmp jumpCheck
     falling:
         // If not already falling then set fall state
@@ -493,6 +507,14 @@ PLAYER: {
         dec player1JumpIndex   // ...otherwise we'd be off the end of the table
         sta player1State    // We're now falling
     jumpCheckFinished: 
+
+        rts
+    }
+
+    playerHit: {
+        lda #STATE_HIT
+        ora #STATE_JUMP
+        sta player1State
 
         rts
     }
