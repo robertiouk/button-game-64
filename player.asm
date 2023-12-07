@@ -107,13 +107,13 @@ PLAYER: {
         and #01
         bne setPosition
         lda SPRITE_POINTERS
-        cmp #90
+        cmp #82
         beq flipLeft
-        lda #90
+        lda #82
         sta currentFrame
         jmp setFrame
     flipLeft:
-        lda #81
+        lda #91
         sta currentFrame
         jmp setFrame
 
