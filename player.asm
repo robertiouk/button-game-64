@@ -40,7 +40,6 @@ PLAYER: {
         .byte $00
     player1WalkSpeed:
         .byte $03
-
     player1FloorCollision:
         .byte $00
     player1LeftCollision:
@@ -197,8 +196,8 @@ PLAYER: {
         beq !+
         lda player1SpriteCollisionSide
         cmp #COLLISION_LEFT
-        beq applyRight
-        jmp applyLeft
+        beq checkRightLimit
+        jmp checkLeftLimit
     !:
         lda player1State
         and #[255 - STATE_WALK_LEFT - STATE_WALK_RIGHT]     // $11110011
@@ -226,6 +225,13 @@ PLAYER: {
         lda.zp JOY1_ZP
         and #JOY_LT
         bne !+
+    checkLeftLimit:
+        // Check player has not reached left limit
+        lda player1X + 1
+        bne applyLeft
+        lda player1X
+        cmp #22
+        bcc !+
     applyLeft:
         lda player1State
         ora #STATE_WALK_LEFT
@@ -249,6 +255,13 @@ PLAYER: {
         lda.zp JOY1_ZP
         and #JOY_RT
         bne !+
+    checkRightLimit:
+        // Check player has not reached right limit
+        lda player1X + 1
+        beq applyRight
+        lda player1X
+        cmp #69
+        bcs !+
     applyRight:
         lda player1State
         ora #STATE_WALK_RIGHT
