@@ -22,14 +22,11 @@ PLAYER: {
 
     playersActive:
         .byte $00
+
     player1X:
         .byte $a0, $00  // 1/16th pixel accuracy (Lo / Hi)
     player1Y:
         .byte $a8       // 1 pixel accuracy
-    player2X:
-        .byte $80       // 1 pixel accuracy
-    player2Y:
-        .byte $bd       // 1 pixel accuracy  
     player1State:
         .byte $00
     player1JumpIndex:
@@ -49,9 +46,36 @@ PLAYER: {
     player1SpriteCollisionSide:
         .byte $00
 
-    defaultFrame:
+    player2X:
+        .byte $c8, $00  // 1/16th pixel accuracy (Lo / Hi)
+    player2Y:
+        .byte $a8       // 1 pixel accuracy  
+    player2State:
+        .byte $00
+    player2JumpIndex:
+        .byte $00
+    player2JumpSprite:
+        .byte $00
+    player2WalkIndex:
+        .byte $00
+    player2WalkSpeed:
+        .byte $03
+    player2FloorCollision:
+        .byte $00
+    player2LeftCollision:
+        .byte $00
+    player2RightCollision:
+        .byte $00
+    player2SpriteCollisionSide:
+        .byte $00
+
+    player1DefaultFrame:
         .byte $40       // dec 64
-    jumpDirection:
+    player2DefaultFrame:
+        .byte $46
+    player1JumpDirection:
+        .byte $00
+    player2JumpDirection:
         .byte $00
 
     currentPlayer:
@@ -72,39 +96,93 @@ PLAYER: {
     
         lda #$40
         sta SPRITE_POINTERS
+        lda #$46
+        sta SPRITE_POINTERS + 1
 
-        // For now only enable player 1
+        // Enable players
         lda VIC.SPRITE_ENABLE
         ora #%00000001
+        ora playersActive
         sta VIC.SPRITE_ENABLE
 
         // Set sprite to multicolour
         lda VIC.SPRITE_MULTICOLOUR
         ora #%00000001
+        ora playersActive
         sta VIC.SPRITE_MULTICOLOUR
 
         lda #1
-        sta playersActive
+        ora playersActive
         sta VIC.SPRITE_DOUBLE_Y
-        
+
         rts
     }
 
     drawPlayer: {
         .var currentFrame = TEMP1
+        .var state = VECTOR1
+        .var jumpSprite = VECTOR2
+        .var jumpDirection = VECTOR3
+        .var walkIndex = VECTOR4
 
-        // Set sprite frame
-        lda defaultFrame
+        lda #1
+        sta currentPlayer
+    drawNext:
+        lda currentPlayer
+        beq setupPlayer1
+    setupPlayer2:
+        lda player2DefaultFrame
         sta currentFrame
+        lda #<player2State
+        sta state
+        lda #>player2State
+        sta state + 1
+        lda #<player2JumpSprite
+        sta jumpSprite
+        lda #>player2JumpSprite
+        sta jumpSprite + 1
+        lda #<player2JumpDirection
+        sta jumpDirection
+        lda #>player2JumpDirection
+        sta jumpDirection + 1
+        lda #<player2WalkIndex
+        sta walkIndex
+        lda #>player2WalkIndex + 1
+        sta walkIndex + 1
+        jmp setupDone
+    setupPlayer1:
+        // Set sprite frame
+        lda player1DefaultFrame
+        sta currentFrame
+        lda #<player1State
+        sta state
+        lda #>player1State
+        sta state + 1
+        lda #<player1JumpSprite
+        sta jumpSprite
+        lda #>player1JumpSprite
+        sta jumpSprite + 1
+        lda #<player1JumpDirection
+        sta jumpDirection
+        lda #>player1JumpDirection
+        sta jumpDirection + 1
+        lda #<player1WalkIndex
+        sta walkIndex
+        lda #>player1WalkIndex + 1
+        sta walkIndex + 1
+    setupDone:
 
         // Has player been hit?
-        lda player1State
+        ldy #0
+        lda (state), y
         and #STATE_HIT
         beq drawNormalFrame
         // Player is hit / alternate hit frame
         lda FRAME_COUNTER
         and #01
-        bne setPosition
+        beq !+
+        jmp setPosition
+    !:
         lda SPRITE_POINTERS
         cmp #82
         beq flipLeft
@@ -118,16 +196,17 @@ PLAYER: {
 
     drawNormalFrame:
         // Player not hit so draw normally
-        lda player1State
+        lda (state), y
         and #[STATE_WALK_LEFT + STATE_WALK_RIGHT + STATE_FALL + STATE_JUMP]
         beq setFrame            // If neither of these then not walking or jumping
     !:
-        lda player1State
+        lda (state), y
         and #[STATE_FALL + STATE_JUMP]
         beq walkFrame    // If either of these then don't set walk frame
     jumpFrame:
-        ldx player1JumpSprite
-        lda jumpDirection
+        lda (jumpSprite), y
+        tax
+        lda (jumpDirection), y
         and #[STATE_WALK_LEFT]
         beq jumpRight
     jumpLeft:
@@ -140,7 +219,8 @@ PLAYER: {
         inx
         cpx #[TABLES.__playerJumpLeft - TABLES.playerJumpLeft]
         beq !+
-        stx player1JumpSprite
+        txa
+        sta (jumpSprite), y
     !:
         jmp setFrame
     walkFrame:
@@ -149,32 +229,54 @@ PLAYER: {
         and #03             // Update every 4th frame for smooth animation
         bne setPosition
         // Update the frame
-        lda player1WalkIndex
+        lda (walkIndex), y
         tax
         inx
         cpx #[TABLES.__playerWalkLeft - TABLES.playerWalkLeft]
         bne !+
         ldx #0
     !:  
-        stx player1WalkIndex
+        txa 
+        sta (walkIndex), y
         // Pick the next walking frame
-        lda player1State
+        lda (state), y
         cmp #STATE_WALK_LEFT
         bne right
     left:
-        ldx player1WalkIndex
+        lda (walkIndex), y
+        tax
         lda TABLES.playerWalkLeft, x
         sta currentFrame
         jmp setFrame
     right:
-        ldx player1WalkIndex
+        lda (walkIndex), y
+        tax
         lda TABLES.playerWalkRight, x
         sta currentFrame
     setFrame:
+        lda currentPlayer
+        beq setPlayer1Frame
+    setPlayer2Frame:
+        lda currentFrame
+        sta SPRITE_POINTERS + 1
+        jmp setPosition
+    setPlayer1Frame:
         lda currentFrame
         sta SPRITE_POINTERS
 
     setPosition:
+        lda currentPlayer
+        beq drawPlayer1X
+    drawPlayer2X:
+        // Set sprite position
+        lda player2X
+        sta VIC.SPRITE_1_X
+        setSpriteMsb(1, player2X)
+
+        lda player2Y
+        sta VIC.SPRITE_1_Y
+        jmp finishedDraw
+    drawPlayer1X:
         // Set sprite position
         lda player1X
         sta VIC.SPRITE_0_X
@@ -182,6 +284,14 @@ PLAYER: {
 
         lda player1Y
         sta VIC.SPRITE_0_Y
+    finishedDraw:
+
+        // Draw next player
+        lda currentPlayer
+        beq !+
+        dec currentPlayer
+        jmp drawNext
+    !:
 
         rts
     }
@@ -236,10 +346,10 @@ PLAYER: {
         lda player1State
         ora #STATE_WALK_LEFT
         sta player1State
-        sta jumpDirection
+        sta player1JumpDirection
 
         lda TABLES.playerWalkLeft
-        sta defaultFrame
+        sta player1DefaultFrame
 
         sec
         lda player1X
@@ -266,10 +376,10 @@ PLAYER: {
         lda player1State
         ora #STATE_WALK_RIGHT
         sta player1State
-        sta jumpDirection
+        sta player1JumpDirection
 
         lda TABLES.playerWalkRight
-        sta defaultFrame
+        sta player1DefaultFrame
 
         clc
         lda player1X

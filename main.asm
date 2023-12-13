@@ -40,12 +40,15 @@ main:
 
     // Load map
     jsr MAPLOADER.drawMap
+    lda #2
+    sta PLAYER.playersActive
     jsr PLAYER.initialise
     jsr BUTTERFLY.initialise
     jsr PICKUP.initialise
     lda #0
     sta.zp LEVEL
     jsr ENEMY.initialise
+
 loop:
     lda performFrameCodeFlag
     beq loop    // Only do stuff if IRQ has been hit
