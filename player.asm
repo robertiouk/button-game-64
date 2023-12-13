@@ -19,6 +19,7 @@ PLAYER: {
     .label JOY_FR = %10000
 
     .label JOY_PORT_A = $dc00
+    .label JOY_PORT_B = $dc01
 
     playersActive:
         .byte $00
@@ -299,7 +300,20 @@ PLAYER: {
     playerControl: {
         lda JOY_PORT_A
         sta.zp JOY1_ZP
+        lda JOY_PORT_B
+        sta.zp JOY2_ZP
 
+        jsr player1Control
+        lda playersActive
+        cmp #2
+        bne !+
+        jsr player2Control
+    !:
+
+        rts
+    }
+
+    player1Control: {
         // Clear the walking states
         lda player1State
         and #STATE_HIT
@@ -394,47 +408,183 @@ PLAYER: {
         rts
     }
 
+    player2Control: {
+        // Clear the walking states
+        lda player2State
+        and #STATE_HIT
+        beq !+
+        lda player2SpriteCollisionSide
+        cmp #COLLISION_LEFT
+        beq checkRightLimit
+        jmp checkLeftLimit
+    !:
+        lda player2State
+        and #[255 - STATE_WALK_LEFT - STATE_WALK_RIGHT]     // $11110011
+        sta player2State
+
+    !up:
+        // If either jumping or falling then skip
+        lda player2State
+        and #[STATE_FALL + STATE_JUMP]  // if either are TRUE then A will be non-zero (Z == 0)
+        bne !+
+        // Now check if up has actually been pressed
+        lda.zp JOY2_ZP
+        and #JOY_UP
+        // Joystick ports are high and pulled down when activated, so 0 means up is pressed
+        bne !+
+        lda player2State
+        ora #STATE_JUMP
+        sta player2State
+        lda #0
+        sta player2JumpIndex
+        sta player2JumpSprite
+    !:
+
+    !left:
+        lda.zp JOY2_ZP
+        and #JOY_LT
+        bne !+
+    checkLeftLimit:
+        // Check player has not reached left limit
+        lda player2X + 1
+        bne applyLeft
+        lda player2X
+        cmp #22
+        bcc !+
+    applyLeft:
+        lda player2State
+        ora #STATE_WALK_LEFT
+        sta player2State
+        sta player2JumpDirection
+
+        lda TABLES.playerWalkLeft
+        sta player2DefaultFrame
+
+        sec
+        lda player2X
+        sbc player2WalkSpeed
+        sta player2X
+        lda player2X + 1
+        sbc #0
+        sta player2X + 1
+        jmp !done+
+    !:
+
+    !right:
+        lda.zp JOY2_ZP
+        and #JOY_RT
+        bne !+
+    checkRightLimit:
+        // Check player has not reached right limit
+        lda player2X + 1
+        beq applyRight
+        lda player2X
+        cmp #69
+        bcs !+
+    applyRight:
+        lda player2State
+        ora #STATE_WALK_RIGHT
+        sta player2State
+        sta player2JumpDirection
+
+        lda TABLES.playerWalkRight
+        sta player2DefaultFrame
+
+        clc
+        lda player2X
+        adc player2WalkSpeed
+        sta player2X
+        lda player2X + 1
+        adc #0
+        sta player2X + 1
+    !:
+
+    !done:
+        rts
+    }
+
     collisionCheck: {
+        .var floorCollision = VECTOR1
+        .var leftCollision = VECTOR2
+        .var rightCollision = VECTOR3
         // Get floor collisions for each foot for player 1
-        lda #00
+        lda #01
+        sta currentPlayer
+    setupNext:
+        beq setupPlayer1
+    setupPlayer2:
+        lda #<player2FloorCollision
+        sta floorCollision
+        lda #>player2FloorCollision
+        sta floorCollision + 1
+        lda #<player2LeftCollision
+        sta leftCollision
+        lda #>player2LeftCollision
+        sta leftCollision + 1
+        lda #<player2RightCollision
+        sta rightCollision
+        lda #>player2RightCollision
+        sta rightCollision + 1        
+        jmp setupDone
+    setupPlayer1:
+        lda #<player1FloorCollision
+        sta floorCollision
+        lda #>player1FloorCollision
+        sta floorCollision + 1
+        lda #<player1LeftCollision
+        sta leftCollision
+        lda #>player1LeftCollision
+        sta leftCollision + 1
+        lda #<player1RightCollision
+        sta rightCollision
+        lda #>player1RightCollision
+        sta rightCollision + 1
+    setupDone:
         ldx #04      // Left foot double-pixel location / 2
         ldy #48     // y Offset. This should be halved for small sprite (#24)
         jsr PLAYER.getCollisionPoint
         jsr UTILS.getCharacterAt
         tax
         lda ATTR_DATA, x
-        sta player1FloorCollision
+        ldy #0
+        sta (floorCollision), y
         
-        lda #00
         ldx #14      // Right foot double-pixel location / 2
         ldy #48
         jsr PLAYER.getCollisionPoint
         jsr UTILS.getCharacterAt
         tax
         lda ATTR_DATA, x
-        ora player1FloorCollision
+        ldy #0
+        ora (floorCollision), y
         and #$f0
-        sta player1FloorCollision
+        sta (floorCollision), y
 
         // Get left collision
-        lda #00
         ldx #00
         ldy #13     // Just beneath chin
         jsr PLAYER.getCollisionPoint
         jsr UTILS.getCharacterAt
         tax
         lda ATTR_DATA, x
-        sta player1LeftCollision
+        ldy #0
+        sta (leftCollision), y
 
         // Get right collision
-        lda #00
         ldx #23
         ldy #13     // Just beneath chin
         jsr PLAYER.getCollisionPoint
         jsr UTILS.getCharacterAt
         tax
         lda ATTR_DATA, x
-        sta player1RightCollision
+        ldy #0
+        sta (rightCollision), y
+        lda currentPlayer
+        beq !+
+        dec currentPlayer
+        lda currentPlayer
+        jmp setupNext
+    !:
         
         jsr checkSpriteCollisions
 
@@ -505,17 +655,42 @@ PLAYER: {
         .var xPixelOffset = TEMP1
         .var yPixelOffset = TEMP2
         .var playerPosition = TEMP3 // uses both TEMP3 & 4 - Lo/Hi
+        .var xPos = VECTOR4
+        .var yPos = VECTOR5
         .var xBorderOffset = 22
         .var yBorderOffset = 49
         stx xPixelOffset
         sty yPixelOffset
 
+        lda currentPlayer
+        beq setupPlayer1
+    setupPlayer2:
+        lda #<player2X
+        sta xPos
+        lda #>player2X
+        sta xPos + 1
+        lda #<player2Y
+        sta yPos
+        lda #>player2Y
+        sta yPos + 1
+        jmp setupDone
+    setupPlayer1:
+        lda #<player1X
+        sta xPos
+        lda #>player1X
+        sta xPos + 1
+        lda #<player1Y
+        sta yPos
+        lda #>player1Y
+        sta yPos + 1
+    setupDone:
+
         // Calculate x & y in screen space
         ldy #00
-        lda player1X, y
+        lda (xPos), y
         sta playerPosition
         iny
-        lda player1X, y
+        lda (xPos), y
         sta playerPosition + 1
         // Convert from 1:1/16 to 1:1
         lda playerPosition + 1  // Hi
@@ -554,7 +729,8 @@ PLAYER: {
 
         tax
 
-        lda player1Y
+        ldy #0
+        lda (yPos), y
         
         cmp #yBorderOffset         // Top of screen
         bcs !+
