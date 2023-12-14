@@ -752,82 +752,142 @@ PLAYER: {
     }
 
     jumpAndFall: {
+        .var state = VECTOR1
+        .var floorCollision = VECTOR2
+        .var yPos = VECTOR3
+        .var jumpIndex = VECTOR4
+
+        lda #1
+        sta currentPlayer
+    setupNext:
+        beq setupPlayer1
+    setupPlayer2:
+        lda #<player2State
+        sta state
+        lda #>player2State
+        sta state + 1
+        lda #<player2FloorCollision
+        sta floorCollision
+        lda #>player2FloorCollision
+        sta floorCollision + 1
+        lda #<player2Y
+        sta yPos
+        lda #>player2Y
+        sta yPos + 1
+        lda #<player2JumpIndex
+        sta jumpIndex
+        lda #>player2JumpIndex
+        sta jumpIndex + 1
+        jmp setupDone
+    setupPlayer1:
+        lda #<player1State
+        sta state
+        lda #>player1State
+        sta state + 1
+        lda #<player1FloorCollision
+        sta floorCollision
+        lda #>player1FloorCollision
+        sta floorCollision + 1
+        lda #<player1Y
+        sta yPos
+        lda #>player1Y
+        sta yPos + 1
+        lda #<player1JumpIndex
+        sta jumpIndex
+        lda #>player1JumpIndex
+        sta jumpIndex + 1
+    setupDone:
+
         // Check falling first, so we don't apply fall immediately after final jump frame
 
         // If character is still jumping then skip straight to jump code
-        lda player1State
+        ldy #0
+        lda (state), y
         and #STATE_JUMP
         bne jumpCheck
         // Check if character has hit the ground
-        lda player1FloorCollision
+        lda (floorCollision), y
         cmp #COLLISION_SOLID
         bne falling
         // Stop falling
-        lda player1State
+        lda (state), y
         and #STATE_FALL
         beq jumpCheck
         and #[255 - STATE_FALL]
-        sta player1State
+        sta (state), y
         // Snap to lower precision to snap to floor.
         // Floor will be multiple of 8, e.g., 80.
         // Worst case Y will by 7
-        lda player1Y
+        lda (yPos), y
         and #%11111000 // is now a multiple of 8
         ora #%00000111  // ora 101 worked well for small sprite
-        sta player1Y
-        inc player1Y
+        clc
+        adc #1
+        sta (yPos), y
         // Player will not be hit now
-        lda player1State
+        lda (state), y
         and #[255 - STATE_HIT]
-        sta player1State
+        sta (state), y
         jmp jumpCheck
     falling:
         // If not already falling then set fall state
-        lda player1State
+        lda (state), y
         and #STATE_FALL
         bne !+
         ora #STATE_FALL
-        sta player1State
+        sta (state), y
         // Pick first falling frame
         lda #[TABLES.__jumpAndFallTable - TABLES.jumpAndFallTable - 1]
-        sta player1JumpIndex
+        sta (jumpIndex), y
     !:
         // If already falling then apply next fall frame
-        lda player1JumpIndex
+        lda (jumpIndex), y
         tax
-        lda player1Y
+        lda (yPos), y
         clc
         adc TABLES.jumpAndFallTable, x
-        sta player1Y
+        sta (yPos), y
         // Proceed fall frame
         cpx #0
         beq jumpCheck   // Fall frame is max (zero)
         dex
-        stx player1JumpIndex
+        txa
+        sta (jumpIndex), y
     jumpCheck:
         // Check jump state
-        lda player1State
+        lda (state), y
         and #STATE_JUMP
         beq jumpCheckFinished
         // Get the current jump frame
-        lda player1JumpIndex
+        lda (jumpIndex), y
         tax
         // Decrement Y by current frame
-        lda player1Y
+        lda (yPos), y
         sec
         sbc TABLES.jumpAndFallTable, x
-        sta player1Y
+        sta (yPos), y
         // Have we reached the final jump frame?
         inx
-        stx player1JumpIndex
+        txa 
+        sta (jumpIndex), y
         cpx #[TABLES.__jumpAndFallTable - TABLES.jumpAndFallTable]
         bne jumpCheckFinished
-        lda player1State
+        lda (state), y
         and #[255 - STATE_JUMP]
         ora #STATE_FALL     // If this wasn't here we could double jump...
-        dec player1JumpIndex   // ...otherwise we'd be off the end of the table
-        sta player1State    // We're now falling
+        sta (state), y    // We're now falling
+        lda (jumpIndex), y
+        sec
+        sbc #1
+        sta (jumpIndex), y   // ...otherwise we'd be off the end of the table
     jumpCheckFinished: 
+        lda currentPlayer
+        beq !+
+        sec
+        sbc #1
+        sta currentPlayer
+        jmp setupNext
+    !:
 
         rts
     }
