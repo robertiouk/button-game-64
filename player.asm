@@ -121,6 +121,7 @@ PLAYER: {
 
     drawPlayer: {
         .var currentFrame = TEMP1
+        .var hitFrame = TEMP2
         .var state = VECTOR1
         .var jumpSprite = VECTOR2
         .var jumpDirection = VECTOR3
@@ -150,6 +151,8 @@ PLAYER: {
         sta walkIndex
         lda #>player2WalkIndex + 1
         sta walkIndex + 1
+        lda SPRITE_POINTERS + 1
+        sta hitFrame
         jmp setupDone
     setupPlayer1:
         // Set sprite frame
@@ -171,6 +174,8 @@ PLAYER: {
         sta walkIndex
         lda #>player1WalkIndex + 1
         sta walkIndex + 1
+        lda SPRITE_POINTERS
+        sta hitFrame
     setupDone:
 
         // Has player been hit?
@@ -184,7 +189,7 @@ PLAYER: {
         beq !+
         jmp setPosition
     !:
-        lda SPRITE_POINTERS
+        lda hitFrame
         cmp #82
         beq flipLeft
         lda #82
@@ -592,9 +597,27 @@ PLAYER: {
     }
 
     checkSpriteCollisions: {
+        .var spriteCollision = TEMP1
+
+        lda #1
+        sta currentPlayer
+
         lda VIC.SPRITE_COLLISION
+        sta spriteCollision
+        tay
+
+    nextPlayer:
+        beq player1Collision
+    player2Collision:
+        lda spriteCollision
+        tay
+        and #%00000010
+        jmp !+
+    player1Collision:
+        lda spriteCollision
         tay
         and #%00000001
+    !:
         beq noCollision
         tya
         pha     // Store the collision value in the stack for now as it the vic register gets wiped
@@ -642,6 +665,13 @@ PLAYER: {
         beq noCollision
         jsr playerHit
     noCollision:
+        lda currentPlayer
+        beq !+
+        sec
+        sbc #1
+        sta currentPlayer
+        jmp nextPlayer
+    !:
 
         rts
     }
@@ -895,8 +925,17 @@ PLAYER: {
     playerHit: {
         lda #STATE_HIT
         ora #STATE_JUMP
-        sta player1State
+        tax
 
+        lda currentPlayer
+        beq player1Hit
+    player2Hit:
+        stx player2State
+        jmp !+
+    player1Hit:
+        stx player1State
+    !:
+    
         rts
     }
 }

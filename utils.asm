@@ -39,6 +39,19 @@ UTILS: {
 
         lda PLAYER.currentPlayer
         beq setupPlayer1
+    setupPlayer2:
+        lda #<PLAYER.player2X
+        sta playerX
+        lda #>PLAYER.player2X
+        sta playerX + 1
+        lda #<PLAYER.player2Y
+        sta playerY
+        lda #>PLAYER.player2Y
+        sta playerY + 1
+        lda #<PLAYER.player2SpriteCollisionSide
+        sta collisionSide
+        lda #>PLAYER.player2SpriteCollisionSide
+        sta collisionSide + 1
         jmp playerDone
     setupPlayer1:
         lda #<PLAYER.player1X

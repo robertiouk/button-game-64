@@ -479,46 +479,6 @@ BUTTERFLY: {
         lda #1
         sta otherYOffset
         jsr UTILS.checkPlayerSpriteCollision
-        // Get x delta - are both MSBs set?
-      /*  ldy #2
-        lda (butterflyX), y
-        dey
-        cmp (playerX), y
-        bne notEqual
-        // Now compare actual x pos
-        lda (butterflyX), y
-        ldy #0
-        sec
-        sbc (playerX), y
-        // We need the absolute value, so check negative
-        bpl absoluteX
-        eor #$ff
-        clc
-        adc #1
-    absoluteX:
-        cmp #14
-        bcs notEqual
-
-        // Get y delta
-        ldy #1
-        lda (butterflyY), y
-        dey
-        sec
-        sbc (playerY), y
-        // We need absolute value, so check negative
-        bpl absoluteY
-        eor #$ff
-        clc
-        adc #1
-    absoluteY:
-        cmp #24
-        bcs notEqual
-        // Collision detected
-        lda #1
-        jmp done
-    notEqual:
-        lda #0
-    done:     */  
 
         rts
     }
