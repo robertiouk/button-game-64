@@ -38,10 +38,6 @@ PICKUP: {
         .byte $00
 
     initialise: {
-        lda VIC.SPRITE_ENABLE
-        ora #%00110000
-        sta VIC.SPRITE_ENABLE
-
         // Set sprite to multicolour
         lda VIC.SPRITE_MULTICOLOUR
         ora #%00110000
@@ -60,6 +56,10 @@ PICKUP: {
         bne pickSecond
         jmp pickFirst
     pickFirst:
+        lda VIC.SPRITE_ENABLE
+        ora #%0001_0000
+        sta VIC.SPRITE_ENABLE
+
         lda dropFrame
         sta SPRITE_POINTERS + 4
         // Set colour
@@ -101,6 +101,10 @@ PICKUP: {
 
         jmp done       
     pickSecond:
+        lda VIC.SPRITE_ENABLE
+        ora #%0010_0000
+        sta VIC.SPRITE_ENABLE
+
         lda dropFrame
         sta SPRITE_POINTERS + 5
         // Set colour
@@ -155,10 +159,6 @@ PICKUP: {
         ldy #25      // y Offset. This should be halved for small sprite (#24)
         jsr getCollisionPoint
         jsr UTILS.getCharacterAt
-        //tax
-        //lda #11
-        //sta (TEMP1), y
-        //txa
         tax
         lda ATTR_DATA, x
         and #$f0
@@ -459,6 +459,58 @@ PICKUP: {
         lsr
 
         tay
+
+        rts
+    }
+
+    getPickup: {
+        beq pickup1
+    pickup2:
+        lda pickup2State
+        and #STATE_LANDED
+        beq done
+
+        lda VIC.SPRITE_ENABLE
+        and #%1101_1111
+        sta VIC.SPRITE_ENABLE
+        lda #0
+        sta VIC.SPRITE_5_Y
+        sta pickup2State
+
+        lda activePickups
+        and #%1111_0101 // Pickup 2 is no longer active
+
+        and #%0000_0001
+        sta activePickups
+        beq done
+        //  Pickup 1 is active, so this is the oldest pickup
+        lda activePickups
+        ora #%0000_0100
+        sta activePickups
+        jmp done
+    pickup1:
+        lda pickup1State
+        and #STATE_LANDED
+        beq done
+        
+        lda VIC.SPRITE_ENABLE
+        and #%1110_1111
+        sta VIC.SPRITE_ENABLE
+        lda #0
+        sta VIC.SPRITE_4_Y
+        sta pickup1State
+
+        lda activePickups
+        and #%1111_1010 // Pickup 1 is no longer active
+
+        and #%0000_0010
+        sta activePickups
+        beq done
+        //  Pickup 2 is active, so this is the oldest pickup
+        lda activePickups
+        ora #%0000_1000
+        sta activePickups
+    done:
 
         rts
     }

@@ -665,6 +665,25 @@ PLAYER: {
         beq noCollision
         jsr playerHit
     noCollision:
+
+    checkPickupCollisions:
+        lda spriteCollision
+        and #%00010000
+        bne pickup1
+        lda spriteCollision
+        and #%00100000
+        bne pickup2
+        jmp noPickup
+    pickup1:
+        lda #0
+        jmp getPickup
+    pickup2:
+        lda #1
+    getPickup:
+        jsr PICKUP.getPickup
+    noPickup:
+
+    checkNextPlayer:
         lda currentPlayer
         beq !+
         sec
