@@ -310,7 +310,8 @@ ENEMY: {
     checkCollision: {
         .var enemyX = VECTOR3
         .var enemyY = VECTOR4
-        .var otherYOffset = TEMP3
+        .var otherYByte = TEMP3
+        .var otherXByte = TEMP4
 
         lda collidingEnemy
         beq setupEnemy1
@@ -336,7 +337,9 @@ ENEMY: {
     enemyDone:
 
         lda #0
-        sta otherYOffset
+        sta otherYByte
+        lda #1
+        sta otherXByte
         jsr UTILS.checkPlayerSpriteCollision
 
         rts

@@ -676,10 +676,14 @@ PLAYER: {
         jmp noPickup
     pickup1:
         lda #0
+        sta PICKUP.currentPickup
         jmp getPickup
     pickup2:
         lda #1
+        sta PICKUP.currentPickup
     getPickup:
+        jsr PICKUP.checkCollision
+        beq noPickup
         jsr PICKUP.getPickup
     noPickup:
 

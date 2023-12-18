@@ -35,7 +35,8 @@ UTILS: {
         .var collisionSide = VECTOR5
         .var xDelta = TEMP1
         .var yDelta = TEMP2
-        .var otherYOffset = TEMP3
+        .var otherYByte = TEMP3
+        .var otherXByte = TEMP4
 
         lda PLAYER.currentPlayer
         beq setupPlayer1
@@ -69,12 +70,14 @@ UTILS: {
     playerDone:
 
         // Get x delta - are both MSBs set?
-        ldy #2
+        ldy otherXByte
+        iny
         lda (otherX), y
-        dey
+        ldy #1
         cmp (playerX), y
         bne notEqual
         // Now compare actual x pos
+        ldy otherXByte
         lda (otherX), y
         ldy #0
         sec
@@ -99,7 +102,7 @@ UTILS: {
         bcs notEqual
 
         // Get y delta
-        ldy otherYOffset
+        ldy otherYByte
         lda (otherY), y
         ldy #0
         sec

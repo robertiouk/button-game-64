@@ -451,7 +451,8 @@ BUTTERFLY: {
     checkCollision: {
         .var butterflyX = VECTOR3
         .var butterflyY = VECTOR4
-        .var otherYOffset = TEMP3
+        .var otherYByte = TEMP3
+        .var otherXByte = TEMP4
 
         lda currentButterfly
         beq setupButterfly1
@@ -477,7 +478,9 @@ BUTTERFLY: {
     butterflyDone:
     
         lda #1
-        sta otherYOffset
+        sta otherYByte
+        lda #1
+        sta otherXByte
         jsr UTILS.checkPlayerSpriteCollision
 
         rts

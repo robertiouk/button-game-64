@@ -36,6 +36,8 @@ PICKUP: {
         .byte $00
     caughtButterfly:
         .byte $00
+    currentPickup:
+        .byte $00
 
     initialise: {
         // Set sprite to multicolour
@@ -464,6 +466,7 @@ PICKUP: {
     }
 
     getPickup: {
+        lda currentPickup
         beq pickup1
     pickup2:
         lda pickup2State
@@ -511,6 +514,44 @@ PICKUP: {
         ora #%0000_1000
         sta activePickups
     done:
+
+        rts
+    }
+
+    checkCollision: {
+        .var pickupX = VECTOR3
+        .var pickupY = VECTOR4
+        .var otherYByte = TEMP3
+        .var otherXByte = TEMP4
+
+        lda currentPickup
+        beq setupPickup1
+    setupPickup2:
+        lda #<pickup2X
+        sta pickupX
+        lda #>pickup2X
+        sta pickupX + 1
+        lda #<pickup2Y
+        sta pickupY
+        lda #>pickup2Y
+        sta pickupY + 1
+        jmp pickupDone
+    setupPickup1:
+        lda #<pickup1X
+        sta pickupX
+        lda #>pickup1X
+        sta pickupX + 1
+        lda #<pickup1Y
+        sta pickupY
+        lda #>pickup1Y
+        sta pickupY + 1
+    pickupDone:
+    
+        lda #0
+        sta otherYByte
+        lda #0
+        sta otherXByte
+        jsr UTILS.checkPlayerSpriteCollision
 
         rts
     }
