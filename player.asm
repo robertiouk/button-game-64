@@ -962,9 +962,13 @@ PLAYER: {
         beq player1Hit
     player2Hit:
         stx player2State
+        dec player2Lives
+        jsr HUD.drawPlayer2Lives
         jmp !+
     player1Hit:
         stx player1State
+        dec player1Lives
+        jsr HUD.drawPlayer1Lives
     !:
     
         rts
