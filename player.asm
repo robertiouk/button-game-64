@@ -46,6 +46,8 @@ PLAYER: {
         .byte $00
     player1SpriteCollisionSide:
         .byte $00
+    player1Lives:
+        .byte $00
 
     player2X:
         .byte $c8, $00  // 1/16th pixel accuracy (Lo / Hi)
@@ -68,6 +70,8 @@ PLAYER: {
     player2RightCollision:
         .byte $00
     player2SpriteCollisionSide:
+        .byte $00
+    player2Lives:
         .byte $00
 
     player1DefaultFrame:
@@ -115,6 +119,10 @@ PLAYER: {
         lda #1
         ora playersActive
         sta VIC.SPRITE_DOUBLE_Y
+
+        lda #9
+        sta player1Lives
+        sta player2Lives
 
         rts
     }

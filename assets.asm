@@ -1,6 +1,7 @@
 .label MAP_DATA = $9000
 .label TILE_DATA = $8100
 .label ATTR_DATA = $8000
+.label CHAR_DATA = $f000
 
 // Sprite pointers occupy the last 8 bytes of screen memory.
 // The formula for setting a sprite pointer is:
@@ -15,6 +16,6 @@
     .import binary "maps\tiles.bin"
 *= MAP_DATA "Map Data"
     .import binary "maps\map.bin"
-*= $f000 "Character set"
+*= CHAR_DATA "Character set"
     .import binary "maps\chars.bin"
 

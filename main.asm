@@ -2,6 +2,7 @@ BasicUpstart2(main)
 
 #import "butterfly.asm"
 #import "enemy.asm"
+#import "hud.asm"
 #import "irq.asm"
 #import "macros.asm"
 #import "maploader.asm"
@@ -48,6 +49,7 @@ main:
     lda #0
     sta.zp LEVEL
     jsr ENEMY.initialise
+    jsr HUD.drawLives
 
 loop:
     lda performFrameCodeFlag
