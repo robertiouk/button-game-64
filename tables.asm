@@ -79,4 +79,13 @@ TABLES: {
         .byte $03, $03, $04, $04, $05
         .byte $05, $06, $07   
     __pickupFall:
+
+    hungerBarCharsTop:
+        .byte $19, $27, $27, $27, $27, $27, $27, $27, $39
+    hungerBarCharsBottom:
+        .byte $20, $30, $30, $30, $30, $30, $30, $30, $40
+    hungerBarCharIncrements:
+        .byte $07, $09, $09, $09, $09, $09, $09, $09, $07
+        //      7   16   25   34   43   52   61   70   77
+        //     $7  $10  $19  $22  $2b  $34  $3d  $46  $4d
 }

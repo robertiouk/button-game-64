@@ -50,6 +50,7 @@ main:
     sta.zp LEVEL
     jsr ENEMY.initialise
     jsr HUD.drawLives
+    jsr HUD.drawHungerBars
 
 loop:
     lda performFrameCodeFlag
@@ -69,6 +70,7 @@ loop:
     jsr PLAYER.jumpAndFall
 
     inc FRAME_COUNTER
+!:
 
     jmp loop
 

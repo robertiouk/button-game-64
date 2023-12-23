@@ -425,6 +425,24 @@ BUTTERFLY: {
         lda #>butterfly1State
         sta state + 1
     setupDone:
+        // First give the player points etc
+        ldy #0
+        lda PLAYER.currentPlayer
+        beq player1Caught
+    player2Caught:
+        lda PLAYER.player2Eaten
+        clc
+        adc (type), y
+        sta PLAYER.player2Eaten
+        jsr HUD.drawPlayer2HungerBar
+        jmp donePoints
+    player1Caught:
+        lda PLAYER.player1Eaten
+        clc
+        adc (type), y
+        sta PLAYER.player1Eaten
+        jsr HUD.drawPlayer1HungerBar
+    donePoints:
 
         ldy #0
         // Set butterfly as caught

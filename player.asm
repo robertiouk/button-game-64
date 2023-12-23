@@ -48,6 +48,8 @@ PLAYER: {
         .byte $00
     player1Lives:
         .byte $00
+    player1Eaten:
+        .byte $00
 
     player2X:
         .byte $c8, $00  // 1/16th pixel accuracy (Lo / Hi)
@@ -72,6 +74,8 @@ PLAYER: {
     player2SpriteCollisionSide:
         .byte $00
     player2Lives:
+        .byte $00
+    player2Eaten:
         .byte $00
 
     player1DefaultFrame:
