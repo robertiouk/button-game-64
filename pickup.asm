@@ -66,6 +66,8 @@ PICKUP: {
         sta SPRITE_POINTERS + 4
         // Set colour
         lda caughtType
+        tax
+        lda TABLES.butterflyTypes, x
         sta VIC.SPRITE_COLOUR_4
 
         // Set the position
@@ -111,6 +113,8 @@ PICKUP: {
         sta SPRITE_POINTERS + 5
         // Set colour
         lda caughtType
+        tax
+        lda TABLES.butterflyTypes, x
         sta VIC.SPRITE_COLOUR_5
 
         // Set the position

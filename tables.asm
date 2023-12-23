@@ -47,6 +47,8 @@ TABLES: {
 
     butterflyTypes:
         .byte WHITE, CYAN, LIGHT_RED, PURPLE
+    butterflyTypeFill:
+        .byte 1, 2, 3, 4
     
     levelEnemy1XLo:
         .byte $30

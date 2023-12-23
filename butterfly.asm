@@ -139,9 +139,10 @@ BUTTERFLY: {
     white:
         ldx #0
     done:
-        lda TABLES.butterflyTypes, x
         ldy #0
+        txa
         sta (type), y
+        lda TABLES.butterflyTypes, x
         ldx currentButterfly
         beq setSprite1Colour
         sta VIC.SPRITE_COLOUR_3
@@ -430,17 +431,22 @@ BUTTERFLY: {
         lda PLAYER.currentPlayer
         beq player1Caught
     player2Caught:
-        lda PLAYER.player2Eaten
+        lda (type), y
+        tax
+        lda TABLES.butterflyTypeFill, x
         clc
-        adc (type), y
+        adc PLAYER.player2Eaten
         sta PLAYER.player2Eaten
         jsr HUD.drawPlayer2HungerBar
         jmp donePoints
     player1Caught:
-        lda PLAYER.player1Eaten
+        lda (type), y
+        tax
+        lda TABLES.butterflyTypeFill, x
         clc
-        adc (type), y
+        adc PLAYER.player1Eaten
         sta PLAYER.player1Eaten
+
         jsr HUD.drawPlayer1HungerBar
     donePoints:
 
@@ -452,7 +458,6 @@ BUTTERFLY: {
 
         // Check type of butterfly caught
         lda (type), y
-        cmp #1
         beq done
         // Drop pickup
         sta PICKUP.caughtType
