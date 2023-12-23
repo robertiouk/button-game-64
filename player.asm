@@ -6,11 +6,16 @@ PLAYER: {
     .label PLAYER_1 = %00000001
     .label PLAYER_2 = %00000010
 
-    .label STATE_JUMP       = %00000001
-    .label STATE_FALL       = %00000010
-    .label STATE_WALK_LEFT  = %00000100
-    .label STATE_WALK_RIGHT = %00001000
-    .label STATE_HIT        = %00010000
+    .label STATE_JUMP        = %00000001
+    .label STATE_FALL        = %00000010
+    .label STATE_WALK_LEFT   = %00000100
+    .label STATE_WALK_RIGHT  = %00001000
+    .label STATE_HIT         = %00010000
+    .label STATE_LIGHT       = %00100000
+    .label STATE_DOUBLE_JUMP = %01000000
+    .label STATE_CONFUSED    = %10000000    
+    // MSB states
+    .label STATE_INVINCIBLE  = %00000001
 
     .label JOY_UP = %00001
     .label JOY_DN = %00010
@@ -29,7 +34,7 @@ PLAYER: {
     player1Y:
         .byte $a8       // 1 pixel accuracy
     player1State:
-        .byte $00
+        .byte $00, $00
     player1JumpIndex:
         .byte $00
     player1JumpSprite:
@@ -58,7 +63,7 @@ PLAYER: {
     player2Y:
         .byte $a8       // 1 pixel accuracy  
     player2State:
-        .byte $00
+        .byte $00, $00
     player2JumpIndex:
         .byte $00
     player2JumpSprite:
@@ -979,6 +984,48 @@ PLAYER: {
         jsr HUD.drawPlayer1Lives
     !:
     
+        rts
+    }
+
+    setPositiveEffect: {
+        rts
+    }
+
+    setNegativeEffect: {
+        .var state = VECTOR1
+
+        lda currentPlayer
+        beq setPlayer1
+    setPlayer2:
+        lda #<player2State
+        sta state
+        lda #>player2State
+        sta state + 1
+        jmp setupDone
+    setPlayer1:
+        lda #<player1State
+        sta state
+        lda #>player1State
+        sta state + 1
+    setupDone:
+
+        ldy #0
+        // Check that negative state or super state not set
+        lda (state), y
+        and #%100000000
+        bne done
+        iny
+        lda (state), y
+        and #%00000001
+        bne done
+
+        // Pick a new negative state
+    done:
+
+        rts
+    }
+
+    setSuperEffect: {
         rts
     }
 }

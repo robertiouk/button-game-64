@@ -14,6 +14,8 @@ PICKUP: {
         .byte $00
     pickup1CollisionPoint:
         .byte $00
+    pickup1Type:
+        .byte $00
 
     pickup2X:
         .byte $00, $00
@@ -24,6 +26,8 @@ PICKUP: {
     pickup2FallIndex:
         .byte $00
     pickup2CollisionPoint:
+        .byte $00
+    pickup2Type:
         .byte $00
 
     dropFrame:
@@ -66,6 +70,7 @@ PICKUP: {
         sta SPRITE_POINTERS + 4
         // Set colour
         lda caughtType
+        sta pickup1Type
         tax
         lda TABLES.butterflyTypes, x
         sta VIC.SPRITE_COLOUR_4
@@ -113,6 +118,7 @@ PICKUP: {
         sta SPRITE_POINTERS + 5
         // Set colour
         lda caughtType
+        sta pickup2Type
         tax
         lda TABLES.butterflyTypes, x
         sta VIC.SPRITE_COLOUR_5
@@ -470,6 +476,8 @@ PICKUP: {
     }
 
     getPickup: {
+        .var type = TEMP1
+
         lda currentPickup
         beq pickup1
     pickup2:
@@ -489,11 +497,15 @@ PICKUP: {
 
         and #%0000_0001
         sta activePickups
+
+        lda pickup2Type
+        sta type
         beq done
         //  Pickup 1 is active, so this is the oldest pickup
         lda activePickups
         ora #%0000_0100
         sta activePickups
+
         jmp done
     pickup1:
         lda pickup1State
@@ -512,12 +524,30 @@ PICKUP: {
 
         and #%0000_0010
         sta activePickups
+
+        lda pickup1Type
+        sta type
         beq done
         //  Pickup 2 is active, so this is the oldest pickup
         lda activePickups
         ora #%0000_1000
         sta activePickups
     done:
+
+        lda type
+        cmp #3 // Negative effect
+        beq negativeEffect
+        cmp #4
+        beq superEffect
+    positiveEffect:
+        jsr PLAYER.setPositiveEffect
+        jmp !+
+    negativeEffect:
+        jsr PLAYER.setNegativeEffect
+        jmp !+
+    superEffect:
+        jsr PLAYER.setSuperEffect
+    !:
 
         rts
     }
