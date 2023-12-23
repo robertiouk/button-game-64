@@ -85,7 +85,7 @@ TABLES: {
     __pickupFall:
 
     hungerBarChars:
-        .byte $19, $20, $20, $20, $20, $20, $20, $20, $29
+        .byte $0f, $16, $16, $16, $16, $16, $16, $16, $1f
     hungerBarCharIncrements:
         .byte $07, $09, $09, $09, $09, $09, $09, $09, $07
         //      7   16   25   34   43   52   61   70   77

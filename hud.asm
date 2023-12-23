@@ -1,9 +1,11 @@
 HUD: {
     .label SCORE_COLOUR = WHITE
+    .label LIFE_CHAR = $4d
+
     scoreChars:
-        .byte $42, $32, $3e, $41, $34, $54
+        .byte $38, $28, $34, $37, $2a, $4a
     digits:
-        .byte $4a, $4b, $4c, $4d, $4e, $4f, $50, $51, $52, $53
+        .byte $40, $41, $42, $43, $44, $45, $46, $47, $48, $49
 
     initialise: {
         jsr drawLives
@@ -66,7 +68,7 @@ HUD: {
         .var lifeIcon = TEMP1
         .var lifeColour = TEMP2
 
-        lda #$57
+        lda #LIFE_CHAR
         sta lifeIcon
         tax
         lda ATTR_DATA, x
@@ -113,7 +115,7 @@ HUD: {
         .var lifeIcon = TEMP1
         .var lifeColour = TEMP2
 
-        lda #$57
+        lda #LIFE_CHAR
         sta lifeIcon
         tax
         lda ATTR_DATA, x
