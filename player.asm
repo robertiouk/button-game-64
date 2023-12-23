@@ -50,6 +50,8 @@ PLAYER: {
         .byte $00
     player1Eaten:
         .byte $00
+    player1Score:
+        .byte $00, $00
 
     player2X:
         .byte $c8, $00  // 1/16th pixel accuracy (Lo / Hi)
@@ -77,6 +79,8 @@ PLAYER: {
         .byte $00
     player2Eaten:
         .byte $00
+    player2Score:
+        .byte $00, $00
 
     player1DefaultFrame:
         .byte $40       // dec 64

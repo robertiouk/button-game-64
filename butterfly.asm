@@ -433,21 +433,45 @@ BUTTERFLY: {
     player2Caught:
         lda (type), y
         tax
+        // Add fill bar
         lda TABLES.butterflyTypeFill, x
         clc
         adc PLAYER.player2Eaten
         sta PLAYER.player2Eaten
+        // Add points
+        sed             // Set BCD mode
+        lda TABLES.butterflyTypePoints, x
+        clc
+        adc PLAYER.player2Score
+        sta PLAYER.player2Score
+        lda #0
+        adc PLAYER.player2Score + 1
+        sta PLAYER.player2Score + 1
+        cld             // Turn off BCD mode
         jsr HUD.drawPlayer2HungerBar
+        jsr HUD.drawPlayer2Score
         jmp donePoints
     player1Caught:
         lda (type), y
         tax
+        // Add fill bar
         lda TABLES.butterflyTypeFill, x
         clc
         adc PLAYER.player1Eaten
         sta PLAYER.player1Eaten
+        // Add points
+        sed             // Set BCD mode
+        lda TABLES.butterflyTypePoints, x
+        clc
+        adc PLAYER.player1Score
+        sta PLAYER.player1Score
+        lda #0
+        adc PLAYER.player1Score + 1
+        sta PLAYER.player1Score + 1
+        cld             // Turn off BCD mode
 
         jsr HUD.drawPlayer1HungerBar
+        jsr HUD.drawPlayer1Score
     donePoints:
 
         ldy #0

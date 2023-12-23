@@ -1,4 +1,18 @@
 HUD: {
+    initialise: {
+        jsr drawLives
+        jsr drawHungerBars
+
+        // Draw Score labels
+        lda #$42
+        sta VIC.SCREEN_RAM + $3c0
+
+        lda #WHITE
+        sta VIC.COLOUR_RAM + $3c0
+
+        rts
+    }
+
     drawLives: {
         jsr drawPlayer1Lives
         lda PLAYER.playersActive
@@ -21,11 +35,22 @@ HUD: {
         rts
     }
 
+    drawScores: {
+        jsr drawPlayer2Score
+        lda PLAYER.playersActive
+        cmp #2
+        bne !+
+        jsr drawPlayer2Score
+    !:
+
+        rts
+    }
+
     drawPlayer1Lives: {
         .var lifeIcon = TEMP1
         .var lifeColour = TEMP2
 
-        lda #$6e
+        lda #$57
         sta lifeIcon
         tax
         lda ATTR_DATA, x
@@ -72,7 +97,7 @@ HUD: {
         .var lifeIcon = TEMP1
         .var lifeColour = TEMP2
 
-        lda #$6e
+        lda #$57
         sta lifeIcon
         tax
         lda ATTR_DATA, x
@@ -121,23 +146,15 @@ HUD: {
 
         // Define screen address
         lda #<VIC.SCREEN_RAM + $398
-        sta screenModTop + 1
-        lda #<VIC.SCREEN_RAM + $3c0
-        sta screenModBottom + 1
+        sta screenMod + 1
         lda #>VIC.SCREEN_RAM + $398
-        sta screenModTop + 2
-        lda #>VIC.SCREEN_RAM + $3c0
-        sta screenModBottom + 2
+        sta screenMod + 2
 
         // Define colour address
         lda #<VIC.COLOUR_RAM + $398
-        sta colourModTop + 1
-        lda #<VIC.COLOUR_RAM + $3c0
-        sta colourModBottom + 1
+        sta colourMod + 1
         lda #>VIC.COLOUR_RAM + $398
-        sta colourModTop + 2
-        lda #>VIC.COLOUR_RAM + $3c0
-        sta colourModBottom + 2
+        sta colourMod + 2
 
         ldx #0
         lda TABLES.hungerBarCharIncrements, x
@@ -175,28 +192,18 @@ HUD: {
         sta segmentOffset
     gotChar:
 
-        lda TABLES.hungerBarCharsTop, x
+        lda TABLES.hungerBarChars, x
         clc 
         adc segmentOffset
-    screenModTop:
-        sta $DEAD
-
-        lda TABLES.hungerBarCharsBottom, x
-        clc 
-        adc segmentOffset
-    screenModBottom:
+    screenMod:
         sta $DEAD
     
         lda #GREEN
-    colourModTop:
-        sta $BEEF
-    colourModBottom:
+    colourMod:
         sta $BEEF
 
-        inc screenModBottom + 1
-        inc screenModTop + 1
-        inc colourModTop + 1
-        inc colourModBottom + 1
+        inc screenMod + 1
+        inc colourMod + 1
 
         inx
 
@@ -218,23 +225,15 @@ HUD: {
 
         // Define screen address
         lda #<VIC.SCREEN_RAM + $3b7
-        sta screenModTop + 1
-        lda #<VIC.SCREEN_RAM + $3df
-        sta screenModBottom + 1
+        sta screenMod + 1
         lda #>VIC.SCREEN_RAM + $3b7
-        sta screenModTop + 2
-        lda #>VIC.SCREEN_RAM + $3df
-        sta screenModBottom + 2
+        sta screenMod + 2
 
         // Define colour address
         lda #<VIC.COLOUR_RAM + $3b7
-        sta colourModTop + 1
-        lda #<VIC.COLOUR_RAM + $3df
-        sta colourModBottom + 1
+        sta colourMod + 1
         lda #>VIC.COLOUR_RAM + $3b7
-        sta colourModTop + 2
-        lda #>VIC.COLOUR_RAM + $3df
-        sta colourModBottom + 2
+        sta colourMod + 2
 
         ldx #0
         lda TABLES.hungerBarCharIncrements, x
@@ -272,28 +271,18 @@ HUD: {
         sta segmentOffset
     gotChar:
 
-        lda TABLES.hungerBarCharsTop, x
+        lda TABLES.hungerBarChars, x
         clc 
         adc segmentOffset
-    screenModTop:
-        sta $DEAD
-
-        lda TABLES.hungerBarCharsBottom, x
-        clc 
-        adc segmentOffset
-    screenModBottom:
+    screenMod:
         sta $DEAD
     
         lda #GREEN
-    colourModTop:
-        sta $BEEF
-    colourModBottom:
+    colourMod:
         sta $BEEF
 
-        inc screenModBottom + 1
-        inc screenModTop + 1
-        inc colourModTop + 1
-        inc colourModBottom + 1
+        inc screenMod + 1
+        inc colourMod + 1
 
         inx
 
@@ -306,5 +295,14 @@ HUD: {
         bne !-
 
        rts
+    }
+
+    drawPlayer1Score: {
+        //3e8
+        rts
+    }
+
+    drawPlayer2Score: {
+        rts
     }
 }

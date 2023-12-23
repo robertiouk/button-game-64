@@ -49,6 +49,8 @@ TABLES: {
         .byte WHITE, CYAN, LIGHT_RED, PURPLE
     butterflyTypeFill:
         .byte 1, 2, 3, 4
+    butterflyTypePoints:
+        .byte 1, 2, 4, 10
     
     levelEnemy1XLo:
         .byte $30
@@ -82,10 +84,8 @@ TABLES: {
         .byte $05, $06, $07   
     __pickupFall:
 
-    hungerBarCharsTop:
-        .byte $19, $27, $27, $27, $27, $27, $27, $27, $39
-    hungerBarCharsBottom:
-        .byte $20, $30, $30, $30, $30, $30, $30, $30, $40
+    hungerBarChars:
+        .byte $19, $20, $20, $20, $20, $20, $20, $20, $29
     hungerBarCharIncrements:
         .byte $07, $09, $09, $09, $09, $09, $09, $09, $07
         //      7   16   25   34   43   52   61   70   77

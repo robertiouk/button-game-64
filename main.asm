@@ -49,9 +49,7 @@ main:
     lda #0
     sta.zp LEVEL
     jsr ENEMY.initialise
-    jsr HUD.drawLives
-    jsr HUD.drawHungerBars
-
+    jsr HUD.initialise
 loop:
     lda performFrameCodeFlag
     beq loop    // Only do stuff if IRQ has been hit
