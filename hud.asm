@@ -1,14 +1,30 @@
 HUD: {
+    .label SCORE_COLOUR = WHITE
+    scoreChars:
+        .byte $42, $32, $3e, $41, $34, $54
+    digits:
+        .byte $4a, $4b, $4c, $4d, $4e, $4f, $50, $51, $52, $53
+
     initialise: {
         jsr drawLives
         jsr drawHungerBars
 
         // Draw Score labels
-        lda #$42
-        sta VIC.SCREEN_RAM + $3c0
+        ldx #0
+    !:
+        lda scoreChars, x
+        sta VIC.SCREEN_RAM + $3c0, x
+        sta VIC.SCREEN_RAM + $3de, x
 
-        lda #WHITE
-        sta VIC.COLOUR_RAM + $3c0
+        lda #SCORE_COLOUR
+        sta VIC.COLOUR_RAM + $3c0, x
+        sta VIC.COLOUR_RAM + $3de, x
+
+        inx
+        cpx #6
+        bne !-
+
+        jsr drawScores
 
         rts
     }
@@ -36,7 +52,7 @@ HUD: {
     }
 
     drawScores: {
-        jsr drawPlayer2Score
+        jsr drawPlayer1Score
         lda PLAYER.playersActive
         cmp #2
         bne !+
@@ -298,11 +314,88 @@ HUD: {
     }
 
     drawPlayer1Score: {
-        //3e8
+        // Thousands... [9]999
+        lda PLAYER.player1Score + 1
+        lsr
+        lsr
+        lsr
+        lsr
+        tax
+        lda digits, x
+        sta VIC.SCREEN_RAM + $3c6
+        lda #SCORE_COLOUR
+        sta VIC.COLOUR_RAM + $3c6
+        // Hundreds... 9[9]99
+        lda PLAYER.player1Score + 1
+        and #$0f
+        tax
+        lda digits, x
+        sta VIC.SCREEN_RAM + $3c7
+        lda #SCORE_COLOUR
+        sta VIC.COLOUR_RAM + $3c7
+        // Tens... 99[9]9
+        lda PLAYER.player1Score
+        lsr
+        lsr
+        lsr
+        lsr
+        tax
+        lda digits, x
+        sta VIC.SCREEN_RAM + $3c8
+        lda #SCORE_COLOUR
+        sta VIC.COLOUR_RAM + $3c8
+        // Units... 999[9]
+        lda PLAYER.player1Score
+        and #$0f
+        tax
+        lda digits, x
+        sta VIC.SCREEN_RAM + $3c9
+        lda #SCORE_COLOUR
+        sta VIC.COLOUR_RAM + $3c9        
+
         rts
     }
 
     drawPlayer2Score: {
+        // Thousands... [9]999
+        lda PLAYER.player2Score + 1
+        lsr
+        lsr
+        lsr
+        lsr
+        tax
+        lda digits, x
+        sta VIC.SCREEN_RAM + $3e4
+        lda #SCORE_COLOUR
+        sta VIC.COLOUR_RAM + $3e4
+        // Hundreds... 9[9]99
+        lda PLAYER.player2Score + 1
+        and #$0f
+        tax
+        lda digits, x
+        sta VIC.SCREEN_RAM + $3e5
+        lda #SCORE_COLOUR
+        sta VIC.COLOUR_RAM + $3e5
+        // Tens... 99[9]9
+        lda PLAYER.player2Score
+        lsr
+        lsr
+        lsr
+        lsr
+        tax
+        lda digits, x
+        sta VIC.SCREEN_RAM + $3e6
+        lda #SCORE_COLOUR
+        sta VIC.COLOUR_RAM + $3e6
+        // Units... 999[9]
+        lda PLAYER.player2Score
+        and #$0f
+        tax
+        lda digits, x
+        sta VIC.SCREEN_RAM + $3e7
+        lda #SCORE_COLOUR
+        sta VIC.COLOUR_RAM + $3e7
+    
         rts
     }
 }
