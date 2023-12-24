@@ -91,6 +91,8 @@ TABLES: {
         //      7   16   25   34   43   52   61   70   77
         //     $7  $10  $19  $22  $2b  $34  $3d  $46  $4d
 
+    negativeStateTable:
+        .byte $01, $02, $04
     negativeStateTiles:
         .byte $0d, $0e, $0f     // Confusion, Poison, Bomb
 }

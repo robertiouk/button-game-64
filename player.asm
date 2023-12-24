@@ -13,9 +13,11 @@ PLAYER: {
     .label STATE_HIT         = %00010000
     .label STATE_LIGHT       = %00100000
     .label STATE_DOUBLE_JUMP = %01000000
-    .label STATE_CONFUSED    = %10000000    
-    // MSB states
-    .label STATE_INVINCIBLE  = %00000001
+    .label STATE_INVINCIBLE  = %10000000    
+    // MSB states (negative)
+    .label STATE_CONFUSED    = %00000001
+    .label STATE_POISON      = %00000010
+    .label STATE_BOMB        = %00000100
 
     .label JOY_UP = %00001
     .label JOY_DN = %00010
@@ -1025,13 +1027,16 @@ PLAYER: {
         bne done
         iny
         lda (state), y
-        and #%00000001
+        and #%00000111
         bne done
 
         // Pick a new negative state
         getRandom(0, 3)
-        ldy #0
         tax
+        ldy #1
+        lda TABLES.negativeStateTable, x
+        sta (state), y      // Store new state
+        ldy #0
         lda TABLES.negativeStateTiles, x
         sta (tile), y
         lda currentPlayer

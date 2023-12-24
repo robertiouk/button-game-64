@@ -21,11 +21,21 @@ HUD: {
     !:
         lda scoreChars, x
         sta VIC.SCREEN_RAM + $3c0, x
+        lda PLAYER.playersActive
+        cmp #2
+        bne skipP2Char
+        lda scoreChars, x
         sta VIC.SCREEN_RAM + $3de, x
+    skipP2Char:
 
         lda #SCORE_COLOUR
         sta VIC.COLOUR_RAM + $3c0, x
+        lda PLAYER.playersActive
+        cmp #2
+        bne skipP2Colour
+        lda #SCORE_COLOUR
         sta VIC.COLOUR_RAM + $3de, x
+    skipP2Colour:
 
         inx
         cpx #6
