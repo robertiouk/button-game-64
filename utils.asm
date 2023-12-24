@@ -163,6 +163,7 @@ UTILS: {
     }
 }
 
+/** Upper is exclusive */
 .macro getRandom(lower, upper) {
 pickNumber:
     // Get the current raster line

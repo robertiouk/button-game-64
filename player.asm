@@ -1029,7 +1029,7 @@ PLAYER: {
         bne done
 
         // Pick a new negative state
-        getRandom(0, 2)
+        getRandom(0, 3)
         ldy #0
         tax
         lda TABLES.negativeStateTiles, x

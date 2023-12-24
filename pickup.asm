@@ -500,13 +500,13 @@ PICKUP: {
 
         lda pickup2Type
         sta type
-        beq done
+        beq setPickup
         //  Pickup 1 is active, so this is the oldest pickup
         lda activePickups
         ora #%0000_0100
         sta activePickups
 
-        jmp done
+        jmp setPickup
     pickup1:
         lda pickup1State
         and #STATE_LANDED
@@ -527,12 +527,12 @@ PICKUP: {
 
         lda pickup1Type
         sta type
-        beq done
+        beq setPickup
         //  Pickup 2 is active, so this is the oldest pickup
         lda activePickups
         ora #%0000_1000
         sta activePickups
-    done:
+    setPickup:
 
         lda type
         cmp #2 // Negative effect
@@ -541,13 +541,13 @@ PICKUP: {
         beq superEffect
     positiveEffect:
         jsr PLAYER.setPositiveEffect
-        jmp !+
+        jmp done
     negativeEffect:
         jsr PLAYER.setNegativeEffect
-        jmp !+
+        jmp done
     superEffect:
         jsr PLAYER.setSuperEffect
-    !:
+    done:
 
         rts
     }
