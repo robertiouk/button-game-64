@@ -993,6 +993,7 @@ PLAYER: {
 
     setNegativeEffect: {
         .var state = VECTOR1
+        .var tile = VECTOR2
 
         lda currentPlayer
         beq setPlayer1
@@ -1001,12 +1002,20 @@ PLAYER: {
         sta state
         lda #>player2State
         sta state + 1
+        lda #<HUD.player2Status
+        sta tile
+        lda #>HUD.player2Status
+        sta tile + 1
         jmp setupDone
     setPlayer1:
         lda #<player1State
         sta state
         lda #>player1State
         sta state + 1
+        lda #<HUD.player1Status
+        sta tile
+        lda #>HUD.player1Status
+        sta tile + 1
     setupDone:
 
         ldy #0
@@ -1020,6 +1029,18 @@ PLAYER: {
         bne done
 
         // Pick a new negative state
+        getRandom(0, 2)
+        ldy #0
+        tax
+        lda TABLES.negativeStateTiles, x
+        sta (tile), y
+        lda currentPlayer
+        beq drawPlayer1Status
+    drawPlayer2Status:
+        jsr HUD.drawPlayer2Status
+        jmp done
+    drawPlayer1Status:
+        jsr HUD.drawPlayer1Status
     done:
 
         rts

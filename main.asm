@@ -89,4 +89,5 @@ clearScreen:
     bne !-
     rts
 
+.break
 #import "assets.asm"

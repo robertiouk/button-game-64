@@ -535,9 +535,9 @@ PICKUP: {
     done:
 
         lda type
-        cmp #3 // Negative effect
+        cmp #2 // Negative effect
         beq negativeEffect
-        cmp #4
+        cmp #3
         beq superEffect
     positiveEffect:
         jsr PLAYER.setPositiveEffect

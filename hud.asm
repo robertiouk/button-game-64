@@ -7,6 +7,11 @@ HUD: {
     digits:
         .byte $40, $41, $42, $43, $44, $45, $46, $47, $48, $49
 
+    player1Status:
+        .byte $00
+    player2Status:
+        .byte $00
+
     initialise: {
         jsr drawLives
         jsr drawHungerBars
@@ -398,6 +403,61 @@ HUD: {
         lda #SCORE_COLOUR
         sta VIC.COLOUR_RAM + $3e7
     
+        rts
+    }
+
+    drawPlayer1Status: {
+        lda #<VIC.SCREEN_RAM + $3a3
+        sta screenMod + 1
+        lda #>VIC.SCREEN_RAM + $3a3
+        sta screenMod + 2
+        lda #<VIC.COLOUR_RAM + $3a3
+        sta colourMod + 1
+        lda #>VIC.COLOUR_RAM + $3a3
+        sta colourMod + 2
+
+        lda player1Status
+        sta.zp MULTIPLY_NUM1
+        lda #MAPLOADER.TILE_DATA_LENGTH
+        sta.zp MULTIPLY_NUM2
+        jsr UTILS.multiply
+        sta.zp MAPLOADER_TILE_LOOKUP
+        lda #>TILE_DATA
+        sta.zp MAPLOADER_TILE_LOOKUP + 1
+
+        ldx #4
+        ldy #0
+    !:
+        lda (MAPLOADER_TILE_LOOKUP), y
+    screenMod:
+        sta $DEAD
+
+        lda #WHITE
+    colourMod:
+        sta $BEEF
+
+        iny
+        cpy #2
+        beq newRow
+        inc screenMod + 1
+        inc colourMod + 1
+        jmp doneScreenInc
+    newRow:
+        lda screenMod + 1
+        clc
+        adc #39
+        sta screenMod + 1
+        sta colourMod + 1
+    doneScreenInc:
+
+        dex
+        
+        bne !-
+
+        rts
+    }
+
+    drawPlayer2Status: {
         rts
     }
 }
