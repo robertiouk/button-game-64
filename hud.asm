@@ -416,7 +416,9 @@ HUD: {
         rts
     }
 
-    drawPlayer1Status: {
+    drawPlayerStatus: {
+        lda PLAYER.currentPlayer
+        bne setupPlayer2
         lda #<VIC.SCREEN_RAM + $3a3
         sta screenMod + 1
         lda #>VIC.SCREEN_RAM + $3a3
@@ -427,6 +429,20 @@ HUD: {
         sta colourMod + 2
 
         lda player1Status
+        jmp doneSetup
+    setupPlayer2:
+        lda #<VIC.SCREEN_RAM + $3b3
+        sta screenMod + 1
+        lda #>VIC.SCREEN_RAM + $3b3
+        sta screenMod + 2
+        lda #<VIC.COLOUR_RAM + $3b3
+        sta colourMod + 1
+        lda #>VIC.COLOUR_RAM + $3b3
+        sta colourMod + 2
+
+        lda player2Status
+    doneSetup:
+
         sta.zp MULTIPLY_NUM1
         lda #MAPLOADER.TILE_DATA_LENGTH
         sta.zp MULTIPLY_NUM2
@@ -464,10 +480,6 @@ HUD: {
         
         bne !-
 
-        rts
-    }
-
-    drawPlayer2Status: {
         rts
     }
 }

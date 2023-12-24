@@ -1039,13 +1039,8 @@ PLAYER: {
         ldy #0
         lda TABLES.negativeStateTiles, x
         sta (tile), y
-        lda currentPlayer
-        beq drawPlayer1Status
-    drawPlayer2Status:
-        jsr HUD.drawPlayer2Status
-        jmp done
-    drawPlayer1Status:
-        jsr HUD.drawPlayer1Status
+
+        jsr HUD.drawPlayerStatus
     done:
 
         rts
