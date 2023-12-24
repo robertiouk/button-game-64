@@ -494,7 +494,8 @@ HUD: {
         bne !+
         lda PLAYER.player1State + 1
         and #%11111111
-        beq skip
+        bne !+ 
+        jmp skip
     !:
         lda #<VIC.SCREEN_RAM + $37a
         sta screenMod + 1
@@ -539,6 +540,9 @@ HUD: {
         lda (MAPLOADER_TILE_LOOKUP), y
     screenMod:
         sta $DEAD
+        
+        tax
+        lda ATTR_DATA, x
     colourMod:
         sta $BEEF
 
