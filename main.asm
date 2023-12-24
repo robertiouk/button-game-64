@@ -67,6 +67,8 @@ loop:
     jsr PLAYER.collisionCheck
     jsr PLAYER.jumpAndFall
 
+    jsr HUD.drawStatusGauges
+
     inc FRAME_COUNTER
 !:
 
@@ -89,5 +91,4 @@ clearScreen:
     bne !-
     rts
 
-.break
 #import "assets.asm"

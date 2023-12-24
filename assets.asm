@@ -1,5 +1,6 @@
 .label MAP_DATA = $9000
-.label TILE_DATA = $8100
+.label HUD_TILE_DATA = $8100
+.label TILE_DATA = $8200
 .label ATTR_DATA = $8000
 .label CHAR_DATA = $f000
 
@@ -12,6 +13,8 @@
     .import binary "assets\character-sprites.bin"
 *= ATTR_DATA "Colours"
     .import binary "maps\colours.bin"
+*= HUD_TILE_DATA "Hud Tiles (4x3)"
+    .import binary "maps\arch-gauge-tiles.bin"
 *= TILE_DATA "Tiles"    // $8000 + 256 attributes    
     .import binary "maps\tiles.bin"
 *= MAP_DATA "Map Data"

@@ -95,4 +95,7 @@ TABLES: {
         .byte $01, $02, $04
     negativeStateTiles:
         .byte $0d, $0e, $0f     // Confusion, Poison, Bomb
+
+    statusGaugeTiles:
+        .byte $01, $02, $03, $04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d, $0e, $00
 }

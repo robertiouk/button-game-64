@@ -482,4 +482,92 @@ HUD: {
 
         rts
     }
+
+    drawStatusGauges: {
+        lda #1
+        sta PLAYER.currentPlayer
+    setupNext:
+        bne setupPlayer2
+    setupPlayer1:
+        lda PLAYER.player1State
+        and #%11100000
+        bne !+
+        lda PLAYER.player1State + 1
+        and #%11111111
+        beq skip
+    !:
+        lda #<VIC.SCREEN_RAM + $37a
+        sta screenMod + 1
+        lda #>VIC.SCREEN_RAM + $37a
+        sta screenMod + 2
+        lda #<VIC.COLOUR_RAM + $37a
+        sta colourMod + 1
+        lda #>VIC.COLOUR_RAM + $37a
+        sta colourMod + 2
+        jmp setupDone
+    setupPlayer2:
+        lda PLAYER.player2State
+        and #%11100000
+        bne !+
+        lda PLAYER.player2State + 1
+        and #%11111111
+        beq skip
+    !:
+        lda #<VIC.SCREEN_RAM + $38a
+        sta screenMod + 1
+        lda #>VIC.SCREEN_RAM + $38a
+        sta screenMod + 2
+        lda #<VIC.COLOUR_RAM + $38a
+        sta colourMod + 1
+        lda #>VIC.COLOUR_RAM + $38a
+        sta colourMod + 2
+    setupDone:
+
+        ldx #0
+        lda TABLES.statusGaugeTiles, x
+
+        sta.zp MULTIPLY_NUM1
+        lda #12     // (4 x 3 chars)
+        sta.zp MULTIPLY_NUM2
+        jsr UTILS.multiply
+        sta.zp MAPLOADER_TILE_LOOKUP
+        lda #>HUD_TILE_DATA
+        sta.zp MAPLOADER_TILE_LOOKUP + 1
+
+        ldy #0
+    !:
+        lda (MAPLOADER_TILE_LOOKUP), y
+    screenMod:
+        sta $DEAD
+    colourMod:
+        sta $BEEF
+
+        iny
+        tya
+        modulo(4)
+        beq addRow
+        inc screenMod + 1
+        inc colourMod + 1
+        jmp incScreenPos
+    addRow:
+        lda screenMod + 1
+        clc
+        adc #37
+        sta screenMod + 1
+        sta colourMod + 1 
+    incScreenPos:
+
+        cpy #12
+        bne !-
+
+        jsr drawPlayerStatus
+    skip:
+        dec PLAYER.currentPlayer
+        lda PLAYER.currentPlayer
+        bne !+ 
+        jmp setupNext
+    !:
+
+        rts
+    }
 }
