@@ -727,4 +727,36 @@ HUD: {
 
         rts
     }
+
+    clearStatusCure: {
+        lda PLAYER.currentPlayer
+        bne setupPlayer2
+        lda #<VIC.SCREEN_RAM + $37f
+        sta screenMod + 1
+        lda #>VIC.SCREEN_RAM + $37f
+        sta screenMod + 2
+        jmp doneSetup
+    setupPlayer2:
+        lda #<VIC.SCREEN_RAM + $385
+        sta screenMod + 1
+        lda #>VIC.SCREEN_RAM + $385
+        sta screenMod + 2
+    doneSetup:
+    
+        lda #0
+        ldx #0
+    nextChar:
+
+    screenMod:
+        sta $DEAD
+
+        inx
+        cpx #3
+        beq done
+        inc screenMod + 1
+        jmp nextChar
+    done:
+
+        rts
+    }
 }

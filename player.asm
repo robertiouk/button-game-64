@@ -1119,6 +1119,7 @@ PLAYER: {
         sta currentPlayer
         jsr HUD.drawPlayerStatus
         jsr HUD.drawStatusReport
+        jsr HUD.clearStatusCure
     check1Done:
 
         // ******** Check Player 2 **********
@@ -1148,6 +1149,7 @@ PLAYER: {
         inc currentPlayer
         jsr HUD.drawPlayerStatus
         jsr HUD.drawStatusReport
+        jsr HUD.clearStatusCure
     check2Done:
 
         rts
