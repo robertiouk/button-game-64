@@ -649,4 +649,82 @@ HUD: {
 
         rts
     }
+
+    drawStatusCure: {
+        .var cure = TEMP1
+        .var qty = TEMP2
+        .var charTable = VECTOR1
+        .var colourTable = VECTOR3
+
+        lda PLAYER.currentPlayer
+        bne setupPlayer2
+        lda #<VIC.SCREEN_RAM + $37f
+        sta screenMod + 1
+        lda #>VIC.SCREEN_RAM + $37f
+        sta screenMod + 2
+        lda #<VIC.COLOUR_RAM + $37f
+        sta colourMod + 1
+        lda #>VIC.COLOUR_RAM + $37f
+        sta colourMod + 2
+
+        lda PLAYER.player1CureAndQty
+        sta cure
+        lda PLAYER.player1CureAndQty + 1
+        sta qty
+        jmp doneSetup
+    setupPlayer2:
+        lda #<VIC.SCREEN_RAM + $385
+        sta screenMod + 1
+        lda #>VIC.SCREEN_RAM + $385
+        sta screenMod + 2
+        lda #<VIC.COLOUR_RAM + $385
+        sta colourMod + 1
+        lda #>VIC.COLOUR_RAM + $385
+        sta colourMod + 2
+
+        lda PLAYER.player2CureAndQty
+        sta cure
+        lda PLAYER.player2CureAndQty + 1
+        sta qty
+    doneSetup:
+
+        lda #$4e        // butterfly icon
+        sta charTable
+        lda #$4c        // x char
+        ldx #1
+        sta charTable, x
+        ldx qty
+        lda digits, x
+        ldx #2
+        sta charTable, x
+
+        ldx cure
+        lda TABLES.butterflyTypes, x
+        sta colourTable
+        ldx #1
+        lda #WHITE
+        sta colourTable, x
+        ldx #2
+        sta colourTable, x
+
+        ldx #0
+    nextChar:
+        lda charTable, x
+    screenMod:
+        sta $DEAD
+
+        lda colourTable, x
+    colourMod:
+        sta $BEEF
+
+        inx
+        cpx #3
+        beq done
+        inc screenMod + 1
+        inc colourMod + 1
+        jmp nextChar
+    done:
+
+        rts
+    }
 }

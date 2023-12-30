@@ -63,6 +63,8 @@ PLAYER: {
         .byte $00
     player1GaugeTick:
         .byte $00
+    player1CureAndQty:
+        .byte $00, $00
 
     player2X:
         .byte $c8, $00  // 1/16th pixel accuracy (Lo / Hi)
@@ -96,7 +98,8 @@ PLAYER: {
         .byte $00
     player2GaugeTick:
         .byte $00
-
+    player2CureAndQty:
+        .byte $00, $00
 
     player1DefaultFrame:
         .byte $40       // dec 64
@@ -1006,6 +1009,7 @@ PLAYER: {
         .var state = VECTOR1
         .var tile = VECTOR2
         .var gaugeCount = VECTOR3
+        .var cure = VECTOR4
 
         lda currentPlayer
         beq setPlayer1
@@ -1022,6 +1026,10 @@ PLAYER: {
         sta gaugeCount
         lda #>player2GaugeCount
         sta gaugeCount + 1
+        lda #<player2CureAndQty
+        sta cure
+        lda #>player2CureAndQty
+        sta cure + 1
         jmp setupDone
     setPlayer1:
         lda #<player1State
@@ -1036,6 +1044,10 @@ PLAYER: {
         sta gaugeCount
         lda #>player1GaugeCount
         sta gaugeCount + 1
+        lda #<player1CureAndQty
+        sta cure
+        lda #>player1CureAndQty
+        sta cure + 1
     setupDone:
 
         ldy #0
@@ -1057,12 +1069,19 @@ PLAYER: {
         ldy #0
         lda TABLES.negativeStateTiles, x
         sta (tile), y
+        // Load cure
+        lda TABLES.negativeStateCureTable, x
+        sta (cure), y
+        lda TABLES.cureQuantityTable, x
+        iny 
+        sta (cure), y
 
         lda #[TABLES.__statusGaugeTiles - TABLES.statusGaugeTiles -1]
         ldy #0
         sta (gaugeCount), y
         jsr HUD.drawPlayerStatus
         jsr HUD.drawStatusReport
+        jsr HUD.drawStatusCure
     done:
 
         rts
