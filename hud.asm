@@ -573,40 +573,79 @@ HUD: {
     }
 
     drawStatusReport: {
+        .var status = TEMP1
+
         lda PLAYER.currentPlayer
         bne setupPlayer2
-        lda #<VIC.SCREEN_RAM + $3a6
+        lda #<VIC.SCREEN_RAM + $3a7
         sta screenMod + 1
-        lda #>VIC.SCREEN_RAM + $3a6
+        lda #>VIC.SCREEN_RAM + $3a7
         sta screenMod + 2
-        lda #<VIC.COLOUR_RAM + $3a6
+        lda #<VIC.COLOUR_RAM + $3a7
         sta colourMod + 1
-        lda #>VIC.COLOUR_RAM + $3a6
+        lda #>VIC.COLOUR_RAM + $3a7
         sta colourMod + 2
 
-        lda player1Status + 1
+        lda PLAYER.player1State + 1
         jmp doneSetup
     setupPlayer2:
-        lda #<VIC.SCREEN_RAM + $3b6
+        lda #<VIC.SCREEN_RAM + $3ad
         sta screenMod + 1
-        lda #>VIC.SCREEN_RAM + $3b6
+        lda #>VIC.SCREEN_RAM + $3ad
         sta screenMod + 2
-        lda #<VIC.COLOUR_RAM + $3b6
+        lda #<VIC.COLOUR_RAM + $3ad
         sta colourMod + 1
-        lda #>VIC.COLOUR_RAM + $3b6
+        lda #>VIC.COLOUR_RAM + $3ad
         sta colourMod + 2
 
-        lda player2Status + 1
+        lda PLAYER.player2State + 1
     doneSetup:
 
+        sta status
+        ldx #0
+    nextChar:
+        lda status
         cmp #PLAYER.STATE_CONFUSED
         bne !+
+        lda TABLES.confusedChars, x
+        jmp drawChar
     !:
         cmp #PLAYER.STATE_POISON
         bne !+
+        lda TABLES.poisonedChars, x
+        jmp drawChar
+    !:
         cmp #PLAYER.STATE_BOMB
         bne blank
+        lda TABLES.bombChars, x
+        jmp drawChar
     blank:
+        lda #0
+    drawChar:
+
+    screenMod:
+        sta $DEAD
+        lda #WHITE
+    colourMod:
+        sta $BEEF
+    
+        inx
+        cpx #5
+        beq newLine
+        cpx #$0a
+        beq done
+        inc screenMod + 1
+        inc colourMod + 1
+        jmp doneCharInc
+    newLine:
+        lda screenMod + 1
+        clc
+        adc #36
+        sta screenMod + 1
+        sta colourMod + 1
+    doneCharInc:
+        jmp nextChar
+    done:
 
         rts
     }

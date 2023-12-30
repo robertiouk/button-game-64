@@ -1097,7 +1097,9 @@ PLAYER: {
         sta player1State + 1
         sta player1GaugeTick
         sta HUD.player1Status
+        sta currentPlayer
         jsr HUD.drawPlayerStatus
+        jsr HUD.drawStatusReport
     check1Done:
 
         // ******** Check Player 2 **********
@@ -1124,7 +1126,9 @@ PLAYER: {
         sta player2State + 1
         sta player2GaugeTick
         sta HUD.player2Status
+        inc currentPlayer
         jsr HUD.drawPlayerStatus
+        jsr HUD.drawStatusReport
     check2Done:
 
         rts
