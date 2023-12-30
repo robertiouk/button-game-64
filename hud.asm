@@ -571,4 +571,43 @@ HUD: {
 
         rts
     }
+
+    drawStatusReport: {
+        lda PLAYER.currentPlayer
+        bne setupPlayer2
+        lda #<VIC.SCREEN_RAM + $3a6
+        sta screenMod + 1
+        lda #>VIC.SCREEN_RAM + $3a6
+        sta screenMod + 2
+        lda #<VIC.COLOUR_RAM + $3a6
+        sta colourMod + 1
+        lda #>VIC.COLOUR_RAM + $3a6
+        sta colourMod + 2
+
+        lda player1Status + 1
+        jmp doneSetup
+    setupPlayer2:
+        lda #<VIC.SCREEN_RAM + $3b6
+        sta screenMod + 1
+        lda #>VIC.SCREEN_RAM + $3b6
+        sta screenMod + 2
+        lda #<VIC.COLOUR_RAM + $3b6
+        sta colourMod + 1
+        lda #>VIC.COLOUR_RAM + $3b6
+        sta colourMod + 2
+
+        lda player2Status + 1
+    doneSetup:
+
+        cmp #PLAYER.STATE_CONFUSED
+        bne !+
+    !:
+        cmp #PLAYER.STATE_POISON
+        bne !+
+        cmp #PLAYER.STATE_BOMB
+        bne blank
+    blank:
+
+        rts
+    }
 }

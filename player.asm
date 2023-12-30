@@ -1062,6 +1062,7 @@ PLAYER: {
         ldy #0
         sta (gaugeCount), y
         jsr HUD.drawPlayerStatus
+        jsr HUD.drawStatusReport
     done:
 
         rts
