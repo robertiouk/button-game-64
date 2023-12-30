@@ -59,6 +59,10 @@ PLAYER: {
         .byte $00
     player1Score:
         .byte $00, $00
+    player1GaugeCount:
+        .byte $00
+    player1GaugeTick:
+        .byte $00
 
     player2X:
         .byte $c8, $00  // 1/16th pixel accuracy (Lo / Hi)
@@ -88,6 +92,11 @@ PLAYER: {
         .byte $00
     player2Score:
         .byte $00, $00
+    player2GaugeCount:
+        .byte $00
+    player2GaugeTick:
+        .byte $00
+
 
     player1DefaultFrame:
         .byte $40       // dec 64
@@ -996,6 +1005,7 @@ PLAYER: {
     setNegativeEffect: {
         .var state = VECTOR1
         .var tile = VECTOR2
+        .var gaugeCount = VECTOR3
 
         lda currentPlayer
         beq setPlayer1
@@ -1008,6 +1018,10 @@ PLAYER: {
         sta tile
         lda #>HUD.player2Status
         sta tile + 1
+        lda #<player2GaugeCount
+        sta gaugeCount
+        lda #>player2GaugeCount
+        sta gaugeCount + 1
         jmp setupDone
     setPlayer1:
         lda #<player1State
@@ -1018,6 +1032,10 @@ PLAYER: {
         sta tile
         lda #>HUD.player1Status
         sta tile + 1
+        lda #<player1GaugeCount
+        sta gaugeCount
+        lda #>player1GaugeCount
+        sta gaugeCount + 1
     setupDone:
 
         ldy #0
@@ -1040,6 +1058,9 @@ PLAYER: {
         lda TABLES.negativeStateTiles, x
         sta (tile), y
 
+        lda #[TABLES.__statusGaugeTiles - TABLES.statusGaugeTiles -1]
+        ldy #0
+        sta (gaugeCount), y
         jsr HUD.drawPlayerStatus
     done:
 
@@ -1047,6 +1068,64 @@ PLAYER: {
     }
 
     setSuperEffect: {
+        rts
+    }
+
+    gaugeCheck: {
+        // ******** Check Player 1 **********
+        lda player1State
+        and #%11100000
+        bne decP1Gauge
+        lda player1State + 1
+        and #%11111111
+        bne decP1Gauge
+        jmp check1Done
+    decP1Gauge:
+        inc player1GaugeTick
+        lda player1GaugeTick
+        and #$3f
+        bne check1Done
+        dec player1GaugeCount
+        lda player1GaugeCount
+        bne check1Done
+        // Gauge expired - reset status
+        lda player1State
+        and #%00011111
+        sta player1State
+        lda #0
+        sta player1State + 1
+        sta player1GaugeTick
+        sta HUD.player1Status
+        jsr HUD.drawPlayerStatus
+    check1Done:
+
+        // ******** Check Player 2 **********
+        lda player2State
+        and #%11100000
+        bne decP2Gauge
+        lda player2State + 1
+        and #%11111111
+        bne decP2Gauge
+        jmp check2Done
+    decP2Gauge:
+        inc player2GaugeTick
+        lda player2GaugeTick
+        and #$3f
+        bne check2Done
+        dec player2GaugeCount
+        lda player2GaugeCount
+        bne check2Done
+        // Gauge expired - reset status
+        lda player2State
+        and #%00011111
+        sta player2State
+        lda #0
+        sta player2State + 1
+        sta player2GaugeTick
+        sta HUD.player2Status
+        jsr HUD.drawPlayerStatus
+    check2Done:
+
         rts
     }
 }

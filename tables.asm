@@ -97,5 +97,7 @@ TABLES: {
         .byte $0d, $0e, $0f     // Confusion, Poison, Bomb
 
     statusGaugeTiles:
-        .byte $01, $02, $03, $04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d, $0e, $00
+        //.byte $01, $02, $03, $04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d, $0e, $00
+        .byte $00, $0e, $0d, $0c, $0b, $0a, $09, $08, $07, $06, $05, $04, $03, $02, $01
+    __statusGaugeTiles:
 }

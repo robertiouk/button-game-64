@@ -66,6 +66,7 @@ loop:
     jsr ENEMY.drawEnemy
     jsr PLAYER.collisionCheck
     jsr PLAYER.jumpAndFall
+    jsr PLAYER.gaugeCheck
 
     jsr HUD.drawStatusGauges
 

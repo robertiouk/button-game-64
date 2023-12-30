@@ -484,19 +484,13 @@ HUD: {
     }
 
     drawStatusGauges: {
+        .var gaugeCount = VECTOR1
+
         lda #1
         sta PLAYER.currentPlayer
     setupNext:
         bne setupPlayer2
     setupPlayer1:
-        lda PLAYER.player1State
-        and #%11100000
-        bne !+
-        lda PLAYER.player1State + 1
-        and #%11111111
-        bne !+ 
-        jmp skip
-    !:
         lda #<VIC.SCREEN_RAM + $37a
         sta screenMod + 1
         lda #>VIC.SCREEN_RAM + $37a
@@ -505,15 +499,12 @@ HUD: {
         sta colourMod + 1
         lda #>VIC.COLOUR_RAM + $37a
         sta colourMod + 2
+        lda #<PLAYER.player1GaugeCount
+        sta gaugeCount
+        lda #>PLAYER.player1GaugeCount
+        sta gaugeCount + 1
         jmp setupDone
     setupPlayer2:
-        lda PLAYER.player2State
-        and #%11100000
-        bne !+
-        lda PLAYER.player2State + 1
-        and #%11111111
-        beq skip
-    !:
         lda #<VIC.SCREEN_RAM + $38a
         sta screenMod + 1
         lda #>VIC.SCREEN_RAM + $38a
@@ -522,9 +513,15 @@ HUD: {
         sta colourMod + 1
         lda #>VIC.COLOUR_RAM + $38a
         sta colourMod + 2
+        lda #<PLAYER.player2GaugeCount
+        sta gaugeCount
+        lda #>PLAYER.player2GaugeCount
+        sta gaugeCount + 1
     setupDone:
 
-        ldx #0
+        ldy #0
+        lda (gaugeCount), y
+        tax
         lda TABLES.statusGaugeTiles, x
 
         sta.zp MULTIPLY_NUM1
