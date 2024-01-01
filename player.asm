@@ -1122,6 +1122,12 @@ PLAYER: {
         lda player1State
         and #%00011111
         sta player1State
+        // Has bomb detonated?
+        lda player1State + 1
+        cmp #STATE_BOMB
+        bne bombCheck1Done
+        jsr playerHit
+    bombCheck1Done:
         lda #0
         sta player1State + 1
         sta player1GaugeTick
@@ -1159,11 +1165,16 @@ PLAYER: {
         lda player2State
         and #%00011111
         sta player2State
+        // Has bomb detonated?
+        lda player2State + 1
+        cmp #STATE_BOMB
+        bne bombCheck2Done
+        jsr playerHit
+    bombCheck2Done:
         lda #0
         sta player2State + 1
         sta player2GaugeTick
         sta HUD.player2Status
-        inc currentPlayer
         jsr HUD.drawPlayerStatus
         jsr HUD.drawStatusReport
         jsr HUD.clearStatusCure
