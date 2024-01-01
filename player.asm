@@ -3,6 +3,8 @@ PLAYER: {
     .label COLLISION_LEFT = $1
     .label COLLISION_RIGHT = $2
 
+    .label POISON_DAMAGE = $2
+
     .label PLAYER_1 = %00000001
     .label PLAYER_2 = %00000010
 
@@ -1105,6 +1107,14 @@ PLAYER: {
         lda player1GaugeTick
         and #$3f
         bne check1Done
+        // Apply active effect
+        lda #0
+        sta currentPlayer
+        lda player1State + 1
+        cmp #STATE_POISON
+        bne appliedP1Effect
+        jsr poisonDamage 
+    appliedP1Effect:
         dec player1GaugeCount
         lda player1GaugeCount
         bne check1Done
@@ -1116,7 +1126,6 @@ PLAYER: {
         sta player1State + 1
         sta player1GaugeTick
         sta HUD.player1Status
-        sta currentPlayer
         jsr HUD.drawPlayerStatus
         jsr HUD.drawStatusReport
         jsr HUD.clearStatusCure
@@ -1135,6 +1144,14 @@ PLAYER: {
         lda player2GaugeTick
         and #$3f
         bne check2Done
+        // Apply active effect
+        lda #1
+        sta currentPlayer
+        lda player2State + 1
+        cmp #STATE_POISON
+        bne appliedP2Effect
+        jsr poisonDamage
+    appliedP2Effect:
         dec player2GaugeCount
         lda player2GaugeCount
         bne check2Done
@@ -1152,6 +1169,43 @@ PLAYER: {
         jsr HUD.clearStatusCure
     check2Done:
 
+        rts
+    }
+
+    poisonDamage: {
+        .var eaten = VECTOR1
+
+        lda currentPlayer
+        beq setupPlayer1
+    setupPlayer2:
+        lda #<player2Eaten
+        sta eaten
+        lda #>player2Eaten
+        sta eaten + 1
+        jmp setupDone   
+    setupPlayer1:
+        lda #<player1Eaten
+        sta eaten
+        lda #>player1Eaten
+        sta eaten + 1
+    setupDone:
+
+        ldy #0
+        lda (eaten), y
+        beq done
+        sec
+        sbc #POISON_DAMAGE
+        bcs notZero
+        lda #0
+    notZero:
+        sta (eaten), y
+        jsr HUD.drawHungerBars
+    done:
+
+        rts
+    }
+
+    bombExplode: {
         rts
     }
 }
