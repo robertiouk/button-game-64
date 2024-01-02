@@ -15,12 +15,13 @@ PLAYER: {
     .label STATE_HIT         = %00010000
     .label STATE_LIGHT       = %00100000
     .label STATE_DOUBLE_JUMP = %01000000
-    .label STATE_INVINCIBLE  = %10000000    
-    // MSB states (negative)
+    .label STATE_SUPER_SENSE = %10000000    
+    // MSB states
     .label STATE_CONFUSED    = %00000001
     .label STATE_POISON      = %00000010
     .label STATE_BOMB        = %00000100
-
+    .label STATE_INVINCIBLE  = %00001000    
+ 
     .label JOY_UP = %00001
     .label JOY_DN = %00010
     .label JOY_LT = %00100
@@ -1052,14 +1053,9 @@ PLAYER: {
         sta cure + 1
     setupDone:
 
-        ldy #0
-        // Check that negative state or super state not set
+        ldy #1
         lda (state), y
-        and #%100000000
-        bne done
-        iny
-        lda (state), y
-        and #%00000111
+        and #%11111111  // Invicible or negative state already applied
         bne done
 
         // Pick a new negative state
