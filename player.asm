@@ -357,13 +357,17 @@ PLAYER: {
     }
 
     player1Control: {
+        .var directionCheck = TEMP1
+
         // Clear the walking states
         lda player1State
         and #STATE_HIT
-        beq !+
+        beq !++
         lda player1SpriteCollisionSide
         cmp #COLLISION_LEFT
-        beq checkRightLimit
+        bne !+
+        jmp checkRightLimit
+    !:
         jmp checkLeftLimit
     !:
         lda player1State
@@ -389,8 +393,16 @@ PLAYER: {
     !:
 
     !left:
+        lda player1State + 1
+        cmp #STATE_CONFUSED
+        beq !confused+
         lda.zp JOY1_ZP
         and #JOY_LT
+        jmp checkLeft
+    !confused:
+        lda.zp JOY1_ZP
+        and #JOY_RT
+    checkLeft:
         bne !+
     checkLeftLimit:
         // Check player has not reached left limit
@@ -419,8 +431,16 @@ PLAYER: {
     !:
 
     !right:
+        lda player1State + 1
+        cmp #STATE_CONFUSED
+        beq !confused+
         lda.zp JOY1_ZP
         and #JOY_RT
+        jmp checkRight
+    !confused:
+        lda.zp JOY1_ZP
+        and #JOY_LT
+    checkRight:
         bne !+
     checkRightLimit:
         // Check player has not reached right limit
@@ -455,10 +475,12 @@ PLAYER: {
         // Clear the walking states
         lda player2State
         and #STATE_HIT
-        beq !+
+        beq !++
         lda player2SpriteCollisionSide
         cmp #COLLISION_LEFT
-        beq checkRightLimit
+        bne !+
+        jmp checkRightLimit
+    !:
         jmp checkLeftLimit
     !:
         lda player2State
@@ -484,8 +506,16 @@ PLAYER: {
     !:
 
     !left:
+        lda player2State + 1
+        cmp #STATE_CONFUSED
+        beq !confused+
         lda.zp JOY2_ZP
         and #JOY_LT
+        jmp checkLeft
+    !confused:
+        lda.zp JOY2_ZP
+        and #JOY_RT
+    checkLeft:
         bne !+
     checkLeftLimit:
         // Check player has not reached left limit
@@ -514,8 +544,16 @@ PLAYER: {
     !:
 
     !right:
+        lda player2State + 1
+        cmp #STATE_CONFUSED
+        beq !confused+
         lda.zp JOY2_ZP
         and #JOY_RT
+        jmp checkRight
+    !confused:
+        lda.zp JOY2_ZP
+        and #JOY_LT 
+    checkRight:
         bne !+
     checkRightLimit:
         // Check player has not reached right limit
