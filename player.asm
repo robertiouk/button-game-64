@@ -1042,7 +1042,93 @@ PLAYER: {
         rts
     }
 
+    /**
+     * Expect the butterfly type is in X register
+     */
+    checkStatusCure: {
+        .var state = VECTOR3
+        .var cureAndQty = VECTOR4
+        .var gaugeCount = VECTOR5
+        .var butterfyType = TEMP4
+
+        lda currentPlayer
+        beq setPlayer1
+    setPlayer2:
+        lda #<player2State
+        sta state
+        lda #>player2State
+        sta state + 1
+        lda #<player2CureAndQty
+        sta cureAndQty
+        lda #>player2CureAndQty
+        sta cureAndQty + 1
+        lda #<player2GaugeCount
+        sta gaugeCount
+        lda #>player2GaugeCount
+        sta gaugeCount + 1
+        jmp setupDone
+    setPlayer1:
+        lda #<player1State
+        sta state
+        lda #>player1State
+        sta state + 1
+        lda #<player1CureAndQty
+        sta cureAndQty
+        lda #>player1CureAndQty
+        sta cureAndQty + 1
+        lda #<player1GaugeCount
+        sta gaugeCount
+        lda #>player1GaugeCount
+        sta gaugeCount + 1
+    setupDone:
+        stx butterfyType
+
+        // First, check cure count
+        ldy #1
+        lda (state), y
+        and #[STATE_BOMB + STATE_CONFUSED + STATE_POISON]
+        beq done
+        // Check cure
+        ldy #0
+        lda (cureAndQty), y
+        cmp butterfyType
+        bne done
+        iny
+        lda (cureAndQty), y
+        sec
+        sbc #1
+        sta (cureAndQty), y
+        bne !+
+        // Cure qty acheived
+        ldy #1
+        lda (state), y
+        and #%10000000
+        sta (state), y
+        lda currentPlayer
+        beq clearP1HudStatus
+        lda #0
+        sta HUD.player2Status
+        jmp hudStatusClear
+    clearP1HudStatus:
+        lda #0
+        ldy #0
+        sta HUD.player1Status
+        sta (gaugeCount), y
+    hudStatusClear:
+        jsr HUD.clearStatusCure
+        jsr HUD.drawPlayerStatus
+        jsr HUD.drawStatusReport
+        jsr HUD.drawStatusGauges
+        jmp done
+    !:
+        jsr HUD.drawStatusCure
+    done:
+
+        rts
+    }
+
     setPositiveEffect: {
+
         rts
     }
 
@@ -1093,7 +1179,7 @@ PLAYER: {
 
         ldy #1
         lda (state), y
-        and #%11111111  // Invicible or negative state already applied
+        and #%11111111  // Invincible or negative state already applied
         bne done
 
         // Pick a new negative state
@@ -1247,10 +1333,6 @@ PLAYER: {
         jsr HUD.drawHungerBars
     done:
 
-        rts
-    }
-
-    bombExplode: {
         rts
     }
 }

@@ -448,6 +448,8 @@ BUTTERFLY: {
         adc PLAYER.player2Score + 1
         sta PLAYER.player2Score + 1
         cld             // Turn off BCD mode
+        // With type in X register check status cure
+        jsr PLAYER.checkStatusCure
         jsr HUD.drawPlayer2HungerBar
         jsr HUD.drawPlayer2Score
         jmp donePoints
@@ -470,6 +472,8 @@ BUTTERFLY: {
         sta PLAYER.player1Score + 1
         cld             // Turn off BCD mode
 
+        // With type in X register check status cure
+        jsr PLAYER.checkStatusCure
         jsr HUD.drawPlayer1HungerBar
         jsr HUD.drawPlayer1Score
     donePoints:
