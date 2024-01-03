@@ -88,8 +88,6 @@ TABLES: {
         .byte $0f, $16, $16, $16, $16, $16, $16, $16, $1f
     hungerBarCharIncrements:
         .byte $07, $09, $09, $09, $09, $09, $09, $09, $07
-        //      7   16   25   34   43   52   61   70   77
-        //     $7  $10  $19  $22  $2b  $34  $3d  $46  $4d
 
     negativeStateTable:
         .byte $01, $02, $04
@@ -99,6 +97,11 @@ TABLES: {
         .byte $01, $00, $02     // Cyan, White, Red
     cureQuantityTable:
         .byte $02, $03, $01
+
+    positiveStateTable:
+        .byte $20, $40, $80     // Light, Double-Jump, Super Sense
+    positiveStateTiles:
+        .byte $10, $11, $12
 
     statusGaugeTiles:
         .byte $00, $0e, $0d, $0c, $0b, $0a, $09, $08, $07, $06, $05, $04, $03, $02, $01
@@ -115,4 +118,24 @@ TABLES: {
     bombChars:
         .byte $00, $00, $00, $00, $00
         .byte $92, $93, $00, $00, $00
+    
+    lightChars:
+        .byte $97, $98, $99, $00, $00
+        .byte $9a, $9b, $9c, $00, $00
+
+    doubleJumpChars:
+        .byte $9d, $9e, $8d, $00, $00
+        .byte $9f, $a0, $00, $00, $00
+
+    superSenseChars:
+        .byte $a1, $a2, $a3, $00, $00
+        .byte $a4, $a5, $a6, $00, $00
+
+    invincibleChars:
+        .byte $00, $00, $00, $00, $00
+        .byte $89, $8a, $8b, $8c, $8d
+
+    extraLifeChars:
+        .byte $a7, $a8, $a9, $00, $00
+        .byte $97, $aa, $00, $00, $00  
 }

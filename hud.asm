@@ -573,7 +573,8 @@ HUD: {
     }
 
     drawStatusReport: {
-        .var status = TEMP1
+        .var statusMsb = TEMP1
+        .var statusLsb = TEMP2
 
         lda PLAYER.currentPlayer
         bne setupPlayer2
@@ -586,6 +587,8 @@ HUD: {
         lda #>VIC.COLOUR_RAM + $3a7
         sta colourMod + 2
 
+        lda PLAYER.player1State
+        sta statusLsb
         lda PLAYER.player1State + 1
         jmp doneSetup
     setupPlayer2:
@@ -598,13 +601,15 @@ HUD: {
         lda #>VIC.COLOUR_RAM + $3ad
         sta colourMod + 2
 
+        lda PLAYER.player2State
+        sta statusLsb
         lda PLAYER.player2State + 1
     doneSetup:
 
-        sta status
+        sta statusMsb
         ldx #0
     nextChar:
-        lda status
+        lda statusMsb
         cmp #PLAYER.STATE_CONFUSED
         bne !+
         lda TABLES.confusedChars, x
@@ -616,8 +621,26 @@ HUD: {
         jmp drawChar
     !:
         cmp #PLAYER.STATE_BOMB
-        bne blank
+        bne !+
         lda TABLES.bombChars, x
+        jmp drawChar
+    !:
+        // Check positive states
+        lda statusLsb
+        and #[PLAYER.STATE_LIGHT + PLAYER.STATE_DOUBLE_JUMP + PLAYER.STATE_SUPER_SENSE]
+        cmp #PLAYER.STATE_LIGHT
+        bne !+
+        lda TABLES.lightChars, x
+        jmp drawChar
+    !:
+        cmp #PLAYER.STATE_DOUBLE_JUMP
+        bne !+
+        lda TABLES.doubleJumpChars, x
+        jmp drawChar
+    !:
+        cmp #PLAYER.STATE_SUPER_SENSE
+        bne blank
+        lda TABLES.superSenseChars, x
         jmp drawChar
     blank:
         lda #0

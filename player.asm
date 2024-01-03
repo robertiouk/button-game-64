@@ -284,8 +284,8 @@ PLAYER: {
         sta (walkIndex), y
         // Pick the next walking frame
         lda (state), y
-        cmp #STATE_WALK_LEFT
-        bne right
+        and #STATE_WALK_LEFT
+        beq right
     left:
         lda (walkIndex), y
         tax
@@ -944,6 +944,7 @@ PLAYER: {
         lda (state), y
         and #STATE_FALL
         beq jumpCheck
+        lda (state), y
         and #[255 - STATE_FALL]
         sta (state), y
         // Snap to lower precision to snap to floor.
@@ -965,6 +966,7 @@ PLAYER: {
         lda (state), y
         and #STATE_FALL
         bne !+
+        lda (state), y
         ora #STATE_FALL
         sta (state), y
         // Pick first falling frame
@@ -1024,19 +1026,19 @@ PLAYER: {
     }
 
     playerHit: {
-        lda #STATE_HIT
-        ora #STATE_JUMP
-        tax
-
         lda currentPlayer
         beq player1Hit
     player2Hit:
-        stx player2State
+        lda player2State
+        ora #[STATE_HIT + STATE_JUMP]
+        sta player2State
         dec player2Lives
         jsr HUD.drawPlayer2Lives
         jmp !+
     player1Hit:
-        stx player1State
+        lda player1State
+        ora #[STATE_HIT + STATE_JUMP]
+        sta player1State
         dec player1Lives
         jsr HUD.drawPlayer1Lives
     !:
@@ -1132,7 +1134,67 @@ PLAYER: {
     }
 
     setPositiveEffect: {
+        .var state = VECTOR1
+        .var tile = VECTOR2
+        .var gaugeCount = VECTOR3
 
+        lda currentPlayer
+        beq setPlayer1
+    setPlayer2:
+        lda #<player2State
+        sta state
+        lda #>player2State
+        sta state + 1
+        lda #<HUD.player2Status
+        sta tile
+        lda #>HUD.player2Status
+        sta tile + 1
+        lda #<player2GaugeCount
+        sta gaugeCount
+        lda #>player2GaugeCount
+        sta gaugeCount + 1
+        jmp setupDone
+    setPlayer1:
+        lda #<player1State
+        sta state
+        lda #>player1State
+        sta state + 1
+        lda #<HUD.player1Status
+        sta tile
+        lda #>HUD.player1Status
+        sta tile + 1
+        lda #<player1GaugeCount
+        sta gaugeCount
+        lda #>player1GaugeCount
+        sta gaugeCount + 1
+    setupDone:
+
+        ldy #1
+        lda (state), y
+        and #%11111111  // Invincible or negative state already applied
+        bne done
+
+        // Pick a new positive state
+        getRandom(0, 3)
+        tax
+        ldy #0
+        lda TABLES.positiveStateTable, x
+        sta.zp MULTIPLY_NUM1   // use this temporarily
+        // Store new state
+        lda (state), y    
+        and #%00011111
+        ora.zp MULTIPLY_NUM1  // Assign new state
+        sta (state), y
+        lda TABLES.positiveStateTiles, x
+        sta (tile), y
+
+        lda #[TABLES.__statusGaugeTiles - TABLES.statusGaugeTiles -1]
+        ldy #0
+        sta (gaugeCount), y
+        jsr HUD.drawPlayerStatus
+        jsr HUD.drawStatusReport
+    done:
+    
         rts
     }
 
@@ -1145,7 +1207,6 @@ PLAYER: {
         lda currentPlayer
         beq setPlayer1
     setPlayer2:
-.break
         lda #<player2State
         sta state
         lda #>player2State
@@ -1187,6 +1248,11 @@ PLAYER: {
         and #%11111111  // Invincible or negative state already applied
         bne done
 
+        // Clear any positive effects
+        ldy #0
+        lda (state), y
+        and #%00011111
+        sta (state), y
         // Pick a new negative state
         getRandom(0, 3)
         tax
