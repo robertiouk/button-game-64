@@ -675,12 +675,14 @@ PLAYER: {
     checkSpriteCollisions: {
         .var spriteCollision = SPRITE_COLLISION
 
-        lda #1
-        sta currentPlayer
-
         lda VIC.SPRITE_COLLISION
         sta spriteCollision
         tay
+
+        lda playersActive
+        sec
+        sbc #1
+        sta currentPlayer
 
     nextPlayer:
         beq player1Collision
