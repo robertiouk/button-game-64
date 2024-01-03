@@ -98,7 +98,7 @@ TABLES: {
     negativeStateCureTable:
         .byte $01, $00, $02     // Cyan, White, Red
     cureQuantityTable:
-        .byte $01, $02, $01
+        .byte $02, $03, $01
 
     statusGaugeTiles:
         .byte $00, $0e, $0d, $0c, $0b, $0a, $09, $08, $07, $06, $05, $04, $03, $02, $01

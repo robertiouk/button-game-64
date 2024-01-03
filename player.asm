@@ -673,7 +673,7 @@ PLAYER: {
     }
 
     checkSpriteCollisions: {
-        .var spriteCollision = TEMP1
+        .var spriteCollision = SPRITE_COLLISION
 
         lda #1
         sta currentPlayer
@@ -1139,6 +1139,7 @@ PLAYER: {
         lda currentPlayer
         beq setPlayer1
     setPlayer2:
+.break
         lda #<player2State
         sta state
         lda #>player2State

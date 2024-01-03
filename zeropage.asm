@@ -28,3 +28,5 @@
 
 // Current level
 .label LEVEL = $1f
+
+.label SPRITE_COLLISION = $20
