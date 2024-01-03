@@ -1086,6 +1086,10 @@ PLAYER: {
         lda (state), y
         and #[STATE_BOMB + STATE_CONFUSED + STATE_POISON]
         beq done
+        // Check if purple butterfly caught - cure all
+        lda BUTTERFLY.capturedType
+        cmp #3
+        beq cured
         // Check cure
         ldy #0
         lda (cureAndQty), y
@@ -1097,6 +1101,7 @@ PLAYER: {
         sbc #1
         sta (cureAndQty), y
         bne !+
+    cured:
         // Cure qty acheived
         ldy #1
         lda (state), y
