@@ -1049,7 +1049,6 @@ PLAYER: {
         .var state = VECTOR3
         .var cureAndQty = VECTOR4
         .var gaugeCount = VECTOR5
-        .var butterfyType = TEMP4
 
         lda currentPlayer
         beq setPlayer1
@@ -1081,7 +1080,6 @@ PLAYER: {
         lda #>player1GaugeCount
         sta gaugeCount + 1
     setupDone:
-        stx butterfyType
 
         // First, check cure count
         ldy #1
@@ -1091,7 +1089,7 @@ PLAYER: {
         // Check cure
         ldy #0
         lda (cureAndQty), y
-        cmp butterfyType
+        cmp BUTTERFLY.capturedType
         bne done
         iny
         lda (cureAndQty), y

@@ -51,7 +51,8 @@ BUTTERFLY: {
 
     currentButterfly:
         .byte $00
-
+    capturedType:
+        .byte $00
     shell:
         .byte $98
 
@@ -432,6 +433,7 @@ BUTTERFLY: {
         beq player1Caught
     player2Caught:
         lda (type), y
+        sta capturedType
         tax
         // Add fill bar
         lda TABLES.butterflyTypeFill, x
@@ -448,13 +450,13 @@ BUTTERFLY: {
         adc PLAYER.player2Score + 1
         sta PLAYER.player2Score + 1
         cld             // Turn off BCD mode
-        // With type in X register check status cure
-        jsr PLAYER.checkStatusCure
+
         jsr HUD.drawPlayer2HungerBar
         jsr HUD.drawPlayer2Score
         jmp donePoints
     player1Caught:
-        lda (type), y
+        lda (type), y      
+        sta capturedType
         tax
         // Add fill bar
         lda TABLES.butterflyTypeFill, x
@@ -472,8 +474,6 @@ BUTTERFLY: {
         sta PLAYER.player1Score + 1
         cld             // Turn off BCD mode
 
-        // With type in X register check status cure
-        jsr PLAYER.checkStatusCure
         jsr HUD.drawPlayer1HungerBar
         jsr HUD.drawPlayer1Score
     donePoints:
@@ -495,7 +495,11 @@ BUTTERFLY: {
     done:
         // Pick new butterfly
         jsr pickNewButterfly
- 
+
+        // Finally check if caught butterfly contributes to status cure. This must be done here to preserve
+        // vectors
+        jsr PLAYER.checkStatusCure
+
         rts
     }
 
