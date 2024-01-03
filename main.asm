@@ -41,7 +41,7 @@ main:
 
     // Load map
     jsr MAPLOADER.drawMap
-    lda #1
+    lda #2
     sta PLAYER.playersActive
     jsr PLAYER.initialise
     jsr BUTTERFLY.initialise

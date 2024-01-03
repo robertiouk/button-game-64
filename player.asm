@@ -1044,9 +1044,6 @@ PLAYER: {
         rts
     }
 
-    /**
-     * Expect the butterfly type is in X register
-     */
     checkStatusCure: {
         .var state = VECTOR3
         .var cureAndQty = VECTOR4
@@ -1112,7 +1109,9 @@ PLAYER: {
         lda currentPlayer
         beq clearP1HudStatus
         lda #0
+        ldy #0
         sta HUD.player2Status
+        sta (gaugeCount), y
         jmp hudStatusClear
     clearP1HudStatus:
         lda #0
