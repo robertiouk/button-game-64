@@ -68,6 +68,8 @@ PLAYER: {
         .byte $00
     player1CureAndQty:
         .byte $00, $00
+    player1JumpCount:
+        .byte $00
 
     player2X:
         .byte $c8, $00  // 1/16th pixel accuracy (Lo / Hi)
@@ -103,6 +105,8 @@ PLAYER: {
         .byte $00
     player2CureAndQty:
         .byte $00, $00
+    player2JumpCount:
+        .byte $00
 
     player1DefaultFrame:
         .byte $40       // dec 64
@@ -375,15 +379,27 @@ PLAYER: {
         sta player1State
 
     !up:
+        lda player1State
+        and #STATE_DOUBLE_JUMP
+        beq notDoubleJump
+        lda player1JumpCount
+        cmp #2
+        beq !+
+        lda player1JumpIndex
+        cmp #10
+        bcs checkJump
+    notDoubleJump:
         // If either jumping or falling then skip
         lda player1State
         and #[STATE_FALL + STATE_JUMP]  // if either are TRUE then A will be non-zero (Z == 0)
         bne !+
+    checkJump:
         // Now check if up has actually been pressed
         lda.zp JOY1_ZP
         and #JOY_UP
         // Joystick ports are high and pulled down when activated, so 0 means up is pressed
         bne !+
+        inc player1JumpCount
         lda player1State
         ora #STATE_JUMP
         sta player1State
@@ -488,15 +504,27 @@ PLAYER: {
         sta player2State
 
     !up:
+        lda player2State
+        and #STATE_DOUBLE_JUMP
+        beq notDoubleJump
+        lda player2JumpCount
+        cmp #2
+        beq !+
+        lda player2JumpIndex
+        cmp #10
+        bcs checkJump
+    notDoubleJump:
         // If either jumping or falling then skip
         lda player2State
         and #[STATE_FALL + STATE_JUMP]  // if either are TRUE then A will be non-zero (Z == 0)
         bne !+
+    checkJump:
         // Now check if up has actually been pressed
         lda.zp JOY2_ZP
         and #JOY_UP
         // Joystick ports are high and pulled down when activated, so 0 means up is pressed
         bne !+
+        inc player2JumpCount
         lda player2State
         ora #STATE_JUMP
         sta player2State
@@ -960,6 +988,16 @@ PLAYER: {
         lda (state), y
         and #[255 - STATE_HIT]
         sta (state), y
+        // Reset jump count
+        lda currentPlayer
+        beq resetJumpP1
+    resetJumpP2:
+        lda #0
+        sta player2JumpCount
+        jmp jumpCheck
+    resetJumpP1:
+        lda #0
+        sta player1JumpCount
         jmp jumpCheck
     falling:
         // If not already falling then set fall state
