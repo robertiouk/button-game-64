@@ -361,7 +361,21 @@ PLAYER: {
     }
 
     player1Control: {
-        .var directionCheck = TEMP1
+        .var speed = TEMP1
+
+        // Set player walk speed
+        lda player1State
+        and #STATE_SUPER_SENSE
+        beq !+
+        lda player1WalkSpeed
+        clc
+        adc #2
+        sta speed
+        jmp speedSet
+    !:
+        lda player1WalkSpeed
+        sta speed
+    speedSet:
 
         // Clear the walking states
         lda player1State
@@ -438,7 +452,7 @@ PLAYER: {
 
         sec
         lda player1X
-        sbc player1WalkSpeed
+        sbc speed
         sta player1X
         lda player1X + 1
         sbc #0
@@ -476,7 +490,7 @@ PLAYER: {
 
         clc
         lda player1X
-        adc player1WalkSpeed
+        adc speed
         sta player1X
         lda player1X + 1
         adc #0
@@ -488,6 +502,22 @@ PLAYER: {
     }
 
     player2Control: {
+        .var speed = TEMP1
+
+        // Set player walk speed
+        lda player2State
+        and #STATE_SUPER_SENSE
+        beq !+
+        lda player2WalkSpeed
+        clc
+        adc #2
+        sta speed
+        jmp speedSet
+    !:
+        lda player2WalkSpeed
+        sta speed
+    speedSet:
+
         // Clear the walking states
         lda player2State
         and #STATE_HIT
@@ -563,7 +593,7 @@ PLAYER: {
 
         sec
         lda player2X
-        sbc player2WalkSpeed
+        sbc speed
         sta player2X
         lda player2X + 1
         sbc #0
@@ -601,7 +631,7 @@ PLAYER: {
 
         clc
         lda player2X
-        adc player2WalkSpeed
+        adc speed
         sta player2X
         lda player2X + 1
         adc #0
