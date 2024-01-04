@@ -996,11 +996,25 @@ PLAYER: {
         tax
         // Decrement Y by current frame
         lda (yPos), y
+        cmp #$8
+        bcc jumpApplied
         sec
         sbc TABLES.jumpAndFallTable, x
         sta (yPos), y
+    jumpApplied:
         // Have we reached the final jump frame?
+        // Check for light weight status
+        lda (state), y
+        and #STATE_LIGHT
+        beq notLight
+        lda.zp FRAME_COUNTER
+        and #2
+        bne inxDone
         inx
+        jmp inxDone
+    notLight:
+        inx
+    inxDone:
         txa 
         sta (jumpIndex), y
         cpx #[TABLES.__jumpAndFallTable - TABLES.jumpAndFallTable]
