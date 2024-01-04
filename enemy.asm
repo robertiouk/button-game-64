@@ -199,6 +199,7 @@ ENEMY: {
         .var speed = VECTOR3
         .var state = VECTOR4
         .var currentEnemy = TEMP1
+        .var actualSpeed = TEMP2
 
         lda #1
         sta currentEnemy
@@ -242,13 +243,26 @@ ENEMY: {
     setupComplete:
 
         ldy #0
+        lda (speed), y
+        sta actualSpeed
+        lda PLAYER.player1State
+        and #PLAYER.STATE_SUPER_SENSE
+        bne slowSpeed
+        lda PLAYER.player2State
+        and #PLAYER.STATE_SUPER_SENSE
+        bne slowSpeed
+        jmp speedSet
+    slowSpeed:
+        clc
+        ror actualSpeed
+    speedSet:
         lda (state), y
     left:
         and #MOVE_LEFT
         beq right
         sec
         lda (xPos), y
-        sbc (speed), y
+        sbc actualSpeed
         sta (xPos), y
         iny
         lda (xPos), y
@@ -276,7 +290,7 @@ ENEMY: {
         beq done
         clc
         lda (xPos), y
-        adc (speed), y
+        adc actualSpeed
         sta (xPos), y
         iny
         lda (xPos), y
