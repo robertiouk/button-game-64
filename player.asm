@@ -170,7 +170,9 @@ PLAYER: {
         .var jumpDirection = VECTOR3
         .var walkIndex = VECTOR4
 
-        lda #1
+        lda playersActive
+        sec
+        sbc #1
         sta currentPlayer
     drawNext:
         lda currentPlayer
@@ -324,7 +326,24 @@ PLAYER: {
 
         lda player2Y
         sta VIC.SPRITE_1_Y
+
+        // Check invincibility
+        lda player2State + 1
+        cmp #STATE_INVINCIBLE
+        bne p2NotInvincible
+        lda.zp FRAME_COUNTER
+        and #3
+        bne finishedDraw
+        lda VIC.SPRITE_ENABLE
+        eor #2
+        sta VIC.SPRITE_ENABLE
         jmp finishedDraw
+    p2NotInvincible:
+        lda VIC.SPRITE_ENABLE
+        ora #2
+        sta VIC.SPRITE_ENABLE
+        jmp finishedDraw
+    
     drawPlayer1X:
         // Set sprite position
         lda player1X
@@ -333,6 +352,22 @@ PLAYER: {
 
         lda player1Y
         sta VIC.SPRITE_0_Y
+
+        // Check invincibility
+        lda player1State + 1
+        cmp #STATE_INVINCIBLE
+        bne p1NotInvincible
+        lda.zp FRAME_COUNTER
+        and #3
+        bne finishedDraw
+        lda VIC.SPRITE_ENABLE
+        eor #1
+        sta VIC.SPRITE_ENABLE
+        jmp finishedDraw
+    p1NotInvincible:
+        lda VIC.SPRITE_ENABLE
+        ora #1
+        sta VIC.SPRITE_ENABLE
     finishedDraw:
 
         // Draw next player
