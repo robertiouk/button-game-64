@@ -625,6 +625,17 @@ HUD: {
         lda TABLES.bombChars, x
         jmp drawChar
     !:
+        // Check super states
+        cmp #PLAYER.STATE_INVINCIBLE
+        bne !+
+        lda TABLES.invincibleChars, x
+        jmp drawChar
+    !:
+        cmp #PLAYER.STATE_EXTRA_LIFE
+        bne !+
+        lda TABLES.extraLifeChars, x
+        jmp drawChar
+    !:
         // Check positive states
         lda statusLsb
         and #[PLAYER.STATE_LIGHT + PLAYER.STATE_DOUBLE_JUMP + PLAYER.STATE_SUPER_SENSE]

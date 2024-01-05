@@ -20,7 +20,8 @@ PLAYER: {
     .label STATE_CONFUSED    = %00000001
     .label STATE_POISON      = %00000010
     .label STATE_BOMB        = %00000100
-    .label STATE_INVINCIBLE  = %00001000    
+    .label STATE_INVINCIBLE  = %00001000
+    .label STATE_EXTRA_LIFE  = %00010000
  
     .label JOY_UP = %00001
     .label JOY_DN = %00010
@@ -1363,6 +1364,72 @@ PLAYER: {
     }
 
     setSuperEffect: {
+        .var state = VECTOR1
+        .var tile = VECTOR2
+        .var gaugeCount = VECTOR3
+
+        lda currentPlayer
+        beq setPlayer1
+    setPlayer2:
+        lda #<player2State
+        sta state
+        lda #>player2State
+        sta state + 1
+        lda #<HUD.player2Status
+        sta tile
+        lda #>HUD.player2Status
+        sta tile + 1
+        lda #<player2GaugeCount
+        sta gaugeCount
+        lda #>player2GaugeCount
+        sta gaugeCount + 1
+        jmp setupDone
+    setPlayer1:
+        lda #<player1State
+        sta state
+        lda #>player1State
+        sta state + 1
+        lda #<HUD.player1Status
+        sta tile
+        lda #>HUD.player1Status
+        sta tile + 1
+        lda #<player1GaugeCount
+        sta gaugeCount
+        lda #>player1GaugeCount
+        sta gaugeCount + 1
+    setupDone:
+        // Clear any applied current state
+        ldy #0
+        lda (state), y    
+        and #%00011111  
+        sta (state), y
+        iny
+        sta (state), y
+
+        // Pick a new super state
+        getRandom(0, 2)
+        tax
+        lda TABLES.superStateTable, x
+        cmp #STATE_INVINCIBLE
+        beq invincible
+        // Extra life
+        
+    invincible:
+        // Store new state
+        ldy #1
+        sta (state), y
+        lda TABLES.superStateTiles, x
+        ldy #0
+        sta (tile), y
+
+        lda #[TABLES.__statusGaugeTiles - TABLES.statusGaugeTiles -1]
+        ldy #0
+        sta (gaugeCount), y
+        jsr HUD.drawPlayerStatus
+        jsr HUD.drawStatusReport
+        jsr HUD.clearStatusCure     // Just in case negative effect was already in place
+    done:
+    
         rts
     }
 

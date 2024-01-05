@@ -103,6 +103,11 @@ TABLES: {
     positiveStateTiles:
         .byte $10, $11, $12
 
+    superStateTable:
+        .byte $08, $10          // Invincible, Extra-Life
+    superStateTiles:
+        .byte $13, $14
+
     statusGaugeTiles:
         .byte $00, $0e, $0d, $0c, $0b, $0a, $09, $08, $07, $06, $05, $04, $03, $02, $01
     __statusGaugeTiles:
