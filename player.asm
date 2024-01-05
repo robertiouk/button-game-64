@@ -1112,6 +1112,9 @@ PLAYER: {
         lda currentPlayer
         beq player1Hit
     player2Hit:
+        lda player2State + 1
+        and #STATE_INVINCIBLE
+        bne !+
         lda player2State
         ora #[STATE_HIT + STATE_JUMP]
         sta player2State
@@ -1119,6 +1122,9 @@ PLAYER: {
         jsr HUD.drawPlayer2Lives
         jmp !+
     player1Hit:
+        lda player1State + 1
+        and #STATE_INVINCIBLE
+        bne !+
         lda player1State
         ora #[STATE_HIT + STATE_JUMP]
         sta player1State
@@ -1410,11 +1416,7 @@ PLAYER: {
         getRandom(0, 2)
         tax
         lda TABLES.superStateTable, x
-        cmp #STATE_INVINCIBLE
-        beq invincible
-        // Extra life
-        
-    invincible:
+
         // Store new state
         ldy #1
         sta (state), y
