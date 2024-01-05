@@ -1154,6 +1154,8 @@ PLAYER: {
         ora #[STATE_HIT + STATE_JUMP]
         sta player2State
         dec player2Lives
+        lda #0
+        sta player2JumpIndex
         jsr HUD.drawPlayer2Lives
         jmp !+
     player1Hit:
@@ -1164,6 +1166,8 @@ PLAYER: {
         ora #[STATE_HIT + STATE_JUMP]
         sta player1State
         dec player1Lives
+        lda #0
+        sta player1JumpIndex
         jsr HUD.drawPlayer1Lives
     !:
     
@@ -1295,7 +1299,7 @@ PLAYER: {
 
         ldy #1
         lda (state), y
-        and #%11111111  // Invincible or negative state already applied
+        and #[STATE_INVINCIBLE + STATE_BOMB + STATE_CONFUSED + STATE_POISON]  // Invincible or negative state already applied
         bne done
 
         // Pick a new positive state
@@ -1369,7 +1373,7 @@ PLAYER: {
 
         ldy #1
         lda (state), y
-        and #%11111111  // Invincible or negative state already applied
+        and #[STATE_INVINCIBLE + STATE_BOMB + STATE_CONFUSED + STATE_POISON]  // Invincible or negative state already applied
         bne done
 
         // Clear any positive effects
