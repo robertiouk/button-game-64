@@ -1552,16 +1552,16 @@ PLAYER: {
         jmp check1Done
     decP1Gauge:
         inc player1GaugeTick
-        lda #player1State
+        lda player1State + 1
         and #STATE_EXTRA_LIFE
         bne longTick
-    longTick:
-        lda player1GaugeTick
-        and #$7f
-        jmp tickCheckDone
     shortTick:
         lda player1GaugeTick
         and #$3f
+        jmp tickCheckDone
+    longTick:
+        lda player1GaugeTick
+        and #$7f
     tickCheckDone:
         bne check1Done
         // Apply active effect
@@ -1615,13 +1615,13 @@ PLAYER: {
         lda #player2State
         and #STATE_EXTRA_LIFE
         bne !longTick+
-    !longTick:
-        lda player2GaugeTick
-        and #$7f
-        jmp !tickCheckDone+
     !shortTick:
         lda player2GaugeTick
         and #$3f
+        jmp !tickCheckDone+
+    !longTick:
+        lda player2GaugeTick
+        and #$7f
     !tickCheckDone:
         bne check2Done
         // Apply active effect
