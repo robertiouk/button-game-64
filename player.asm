@@ -1324,6 +1324,11 @@ PLAYER: {
         sta (state), y
         lda TABLES.positiveStateTiles, x
         sta (tile), y
+        // Clear extra life state, if set
+        iny
+        lda (state), y
+        and #[255 - STATE_EXTRA_LIFE]
+        sta (state), y
 
         lda #[TABLES.__statusGaugeTiles - TABLES.statusGaugeTiles -1]
         ldy #0
@@ -1400,6 +1405,11 @@ PLAYER: {
         ldy #0
         lda (state), y
         and #%00011111
+        sta (state), y
+        iny
+        // Clear extra life, if set
+        lda (state), y
+        and #[255 - STATE_EXTRA_LIFE]
         sta (state), y
         // Pick a new negative state
         getRandom(0, 3)
