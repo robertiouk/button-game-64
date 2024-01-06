@@ -1265,6 +1265,7 @@ PLAYER: {
         .var state = VECTOR1
         .var tile = VECTOR2
         .var gaugeCount = VECTOR3
+        .var tickCount = VECTOR4
 
         lda currentPlayer
         beq setPlayer1
@@ -1281,6 +1282,10 @@ PLAYER: {
         sta gaugeCount
         lda #>player2GaugeCount
         sta gaugeCount + 1
+        lda #<player2GaugeTick
+        sta tickCount
+        lda #>player2GaugeTick
+        sta tickCount + 1
         jmp setupDone
     setPlayer1:
         lda #<player1State
@@ -1295,6 +1300,10 @@ PLAYER: {
         sta gaugeCount
         lda #>player1GaugeCount
         sta gaugeCount + 1
+        lda #<player1GaugeTick
+        sta tickCount
+        lda #>player1GaugeTick
+        sta tickCount + 1
     setupDone:
 
         ldy #1
@@ -1319,6 +1328,8 @@ PLAYER: {
         lda #[TABLES.__statusGaugeTiles - TABLES.statusGaugeTiles -1]
         ldy #0
         sta (gaugeCount), y
+        lda #0
+        sta (tickCount), y
         jsr HUD.drawPlayerStatus
         jsr HUD.drawStatusReport
     done:
@@ -1331,6 +1342,7 @@ PLAYER: {
         .var tile = VECTOR2
         .var gaugeCount = VECTOR3
         .var cure = VECTOR4
+        .var tickCount = VECTOR5
 
         lda currentPlayer
         beq setPlayer1
@@ -1351,6 +1363,10 @@ PLAYER: {
         sta cure
         lda #>player2CureAndQty
         sta cure + 1
+        lda #<player2GaugeTick
+        sta tickCount
+        lda #>player2GaugeTick
+        sta tickCount + 1
         jmp setupDone
     setPlayer1:
         lda #<player1State
@@ -1369,6 +1385,10 @@ PLAYER: {
         sta cure
         lda #>player1CureAndQty
         sta cure + 1
+        lda #<player1GaugeTick
+        sta tickCount
+        lda #>player1GaugeTick
+        sta tickCount + 1
     setupDone:
 
         ldy #1
@@ -1400,6 +1420,8 @@ PLAYER: {
         lda #[TABLES.__statusGaugeTiles - TABLES.statusGaugeTiles -1]
         ldy #0
         sta (gaugeCount), y
+        lda #0
+        sta (tickCount), y
         jsr HUD.drawPlayerStatus
         jsr HUD.drawStatusReport
         jsr HUD.drawStatusCure
@@ -1412,6 +1434,8 @@ PLAYER: {
         .var state = VECTOR1
         .var tile = VECTOR2
         .var gaugeCount = VECTOR3
+        .var tickCount = VECTOR4
+        .var lives = VECTOR5
 
         lda currentPlayer
         beq setPlayer1
@@ -1428,6 +1452,14 @@ PLAYER: {
         sta gaugeCount
         lda #>player2GaugeCount
         sta gaugeCount + 1
+        lda #<player2GaugeTick
+        sta tickCount
+        lda #>player2GaugeTick
+        sta tickCount + 1
+        lda #<player2Lives
+        sta lives 
+        lda #>player2Lives
+        sta lives + 1
         jmp setupDone
     setPlayer1:
         lda #<player1State
@@ -1442,6 +1474,14 @@ PLAYER: {
         sta gaugeCount
         lda #>player1GaugeCount
         sta gaugeCount + 1
+        lda #<player1GaugeTick
+        sta tickCount
+        lda #>player1GaugeTick
+        sta tickCount + 1
+        lda #<player1Lives
+        sta lives 
+        lda #>player1Lives
+        sta lives + 1
     setupDone:
         // Clear any applied current state
         ldy #0
@@ -1455,6 +1495,31 @@ PLAYER: {
         getRandom(0, 2)
         tax
         lda TABLES.superStateTable, x
+        cmp #STATE_EXTRA_LIFE
+        bne !+
+        // Award extra life
+        ldy #0
+        lda (lives), y
+        cmp #9
+        bcs pickInvincible
+        clc
+        adc #1
+        sta (lives), y
+        lda currentPlayer
+        bne drawP2Lives
+    drawP1Lives:
+        jsr HUD.drawPlayer1Lives
+        jmp extraLifeDone
+    drawP2Lives:
+        jsr HUD.drawPlayer2Lives
+    extraLifeDone:
+        lda #STATE_EXTRA_LIFE
+        ldx #1
+        jmp !+
+    pickInvincible:
+        lda #STATE_INVINCIBLE
+        ldx #0
+    !:
 
         // Store new state
         ldy #1
@@ -1466,6 +1531,8 @@ PLAYER: {
         lda #[TABLES.__statusGaugeTiles - TABLES.statusGaugeTiles -1]
         ldy #0
         sta (gaugeCount), y
+        lda #0
+        sta (tickCount), y
         jsr HUD.drawPlayerStatus
         jsr HUD.drawStatusReport
         jsr HUD.clearStatusCure     // Just in case negative effect was already in place
@@ -1485,8 +1552,17 @@ PLAYER: {
         jmp check1Done
     decP1Gauge:
         inc player1GaugeTick
+        lda #player1State
+        and #STATE_EXTRA_LIFE
+        bne longTick
+    longTick:
+        lda player1GaugeTick
+        and #$7f
+        jmp tickCheckDone
+    shortTick:
         lda player1GaugeTick
         and #$3f
+    tickCheckDone:
         bne check1Done
         // Apply active effect
         lda #0
@@ -1496,8 +1572,16 @@ PLAYER: {
         bne appliedP1Effect
         jsr poisonDamage 
     appliedP1Effect:
+        cmp #STATE_EXTRA_LIFE
+        bne !+
+        // Extra life
+        lda #0
+        sta player1GaugeCount
+        jmp decComplete
+    !:
         dec player1GaugeCount
         lda player1GaugeCount
+    decComplete:
         bne check1Done
         // Gauge expired - reset status
         lda player1State
@@ -1528,8 +1612,17 @@ PLAYER: {
         jmp check2Done
     decP2Gauge:
         inc player2GaugeTick
+        lda #player2State
+        and #STATE_EXTRA_LIFE
+        bne !longTick+
+    !longTick:
+        lda player2GaugeTick
+        and #$7f
+        jmp !tickCheckDone+
+    !shortTick:
         lda player2GaugeTick
         and #$3f
+    !tickCheckDone:
         bne check2Done
         // Apply active effect
         lda #1
@@ -1539,8 +1632,16 @@ PLAYER: {
         bne appliedP2Effect
         jsr poisonDamage
     appliedP2Effect:
+        cmp #STATE_EXTRA_LIFE
+        bne !+
+        // Extra life
+        lda #0
+        sta player2GaugeCount
+        jmp !decComplete+
+    !:
         dec player2GaugeCount
         lda player2GaugeCount
+    !decComplete:
         bne check2Done
         // Gauge expired - reset status
         lda player2State
