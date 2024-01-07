@@ -445,9 +445,17 @@ ENEMY: {
         ror actualSpeed
     speedSet:
         lda (state), y
+        and #STATE_JUMP
+        beq !noJump+
+        ldx #2
+        jmp left
+    !noJump:
+        ldx #0
     left:
+        ldy #0
+        lda (state), y
         and #MOVE_LEFT
-        beq right
+        beq rightCheck
         sec
         lda (xPos), y
         sbc actualSpeed
@@ -477,8 +485,22 @@ ENEMY: {
         ora #MOVE_RIGHT
         sta (state), y
     !:
+        cpx #0
+        beq !+
+        dex
+        jmp left
+    !:
         jmp done
+    rightCheck:
+        lda (state), y
+        and #STATE_JUMP
+        beq !noJump+
+        ldx #2
+        jmp right
+    !noJump:
+        ldx #0
     right:
+        ldy #0
         lda (state), y
         and #MOVE_RIGHT
         beq done
@@ -494,7 +516,7 @@ ENEMY: {
         lda (xPos), y
         adc #0
         sta (xPos), y
-        beq done
+        beq !+
         ldy #1
         lda (xPos), y
         cmp #MAX_X
@@ -503,13 +525,19 @@ ENEMY: {
         lda (collision), y
         cmp #03
         beq !switchDirection+
-        jmp done
+        jmp !+
     !switchDirection:
         ldy #0
         lda (state), y
         and #[255 - MOVE_RIGHT]
         ora #MOVE_LEFT
         sta (state), y
+    !:
+        cpx #0
+        beq !+
+        dex
+        jmp right
+    !:
     done:
         lda currentEnemy
         beq !+
