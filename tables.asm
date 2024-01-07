@@ -59,13 +59,14 @@ TABLES: {
     levelEnemy1Y:
         .byte $bd
     levelEnemy1Type:
-        .byte $03       // 01 = Hedgehog, 02 = Bird, 03 = Spider
+        .byte $01       // 01 = Hedgehog, 02 = Bird, 03 = Spider
     levelEnemy2XLo:
         .byte $20
     levelEnemy2XHi:
         .byte $01
     levelEnemy2Y:
-        .byte $bd
+        //.byte $bd
+        .byte $8d
     levelEnemy2Type:
         .byte $03
 

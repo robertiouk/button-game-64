@@ -625,6 +625,7 @@ ENEMY: {
         .var jumpIndex = VECTOR4
         .var footCollision = VECTOR5
         .var currentEnemy = TEMP1
+        .var deltaValue = TEMP2
 
         jsr floorCollisionCheck
         
@@ -740,9 +741,25 @@ ENEMY: {
         // If already falling then apply next fall frame
         lda (jumpIndex), y
         tax
+        lda TABLES.jumpAndFallTable, x
+        sta deltaValue
+
+        // Check for super sense to half fall speed
+        lda PLAYER.player1State
+        and #PLAYER.STATE_SUPER_SENSE
+        bne halfSpeedFall
+        lda PLAYER.player2State
+        and #PLAYER.STATE_SUPER_SENSE
+        bne halfSpeedFall
+        jmp !+
+    halfSpeedFall:
+        clc
+        ror deltaValue
+    !: 
+
         lda (yPos), y
         clc
-        adc TABLES.jumpAndFallTable, x
+        adc deltaValue
         sta (yPos), y
         // Proceed fall frame
         cpx #0
@@ -758,18 +775,38 @@ ENEMY: {
         // Get the current jump frame
         lda (jumpIndex), y
         tax
+
+        lda TABLES.jumpAndFallTable, x
+        sta deltaValue
+
+        // Check for super sense to half fall speed
+        lda PLAYER.player1State
+        and #PLAYER.STATE_SUPER_SENSE
+        bne halfSpeedJump
+        lda PLAYER.player2State
+        and #PLAYER.STATE_SUPER_SENSE
+        bne halfSpeedJump
+        jmp !+
+    halfSpeedJump:
+        lda FRAME_COUNTER
+        and #2
+        beq !+
+        jmp updatedJumpIndex
+    !:
+
         // Decrement Y by current frame
         lda (yPos), y
         cmp #$8
         bcc jumpApplied
         sec
-        sbc TABLES.jumpAndFallTable, x
+        sbc deltaValue
         sta (yPos), y
     jumpApplied:
         // Have we reached the final jump frame?
         inx
         txa 
         sta (jumpIndex), y
+    updatedJumpIndex:
         cpx #[TABLES.__jumpAndFallTable - TABLES.jumpAndFallTable]
         bne jumpCheckFinished
         lda (state), y
