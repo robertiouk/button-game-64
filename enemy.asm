@@ -5,6 +5,8 @@ ENEMY: {
     .label HEDGEHOG_ANIMATION_SPEED = %11111000  // every 8th frame
     .label BIRD_SPEED = $ff
     .label BIRD_ANIMATION_SPEED = %11111100 // every 4th frame
+    .label SPIDER_SPEED = $ff
+    .label SPIDER_ANIMATION_SPEED = %11111110 // every 2nd frame
     .label MIN_X = $1c
     .label MAX_X = $3c
     .label ENEMY_HEDGEHOG = $01
@@ -68,6 +70,8 @@ ENEMY: {
         beq hedgehogRight
         cmp #ENEMY_BIRD
         beq birdRight
+        cmp #ENEMY_SPIDER
+        beq spiderRight
     hedgehogRight:
         // Set the number of animation frames
         lda #[TABLES.__hedgehogWalkRight - TABLES.hedgehogWalkRight - 1]
@@ -117,6 +121,31 @@ ENEMY: {
 
         lda #BIRD_SPEED
         sta enemy1Speed
+        jmp setSprite1Pos
+    spiderRight:
+        // Set the number of animation frames
+        lda #[TABLES.__spiderWalkRight - TABLES.spiderWalkRight - 1]
+        sta enemy1Frames
+        lda #<TABLES.spiderWalkRight
+        sta.zp ENEMY1_RIGHT_FRAME_TABLE
+        lda #>TABLES.spiderWalkRight
+        sta.zp ENEMY1_RIGHT_FRAME_TABLE + 1
+        lda #<TABLES.spiderWalkLeft
+        sta.zp ENEMY1_LEFT_FRAME_TABLE
+        lda #>TABLES.spiderWalkLeft
+        sta.zp ENEMY1_LEFT_FRAME_TABLE + 1
+
+        lda #SPIDER_ANIMATION_SPEED
+        sta enemy1AnimationSpeed
+
+        lda #0
+        sta enemy1Frame
+        sta SPRITE_POINTERS + 6
+        lda #BROWN
+        sta VIC.SPRITE_COLOUR_6
+
+        lda #SPIDER_SPEED
+        sta enemy1Speed
 
     setSprite1Pos:
         // Set sprite1 pos
@@ -139,6 +168,8 @@ ENEMY: {
         beq hedgehogLeft
         cmp #ENEMY_BIRD
         beq birdLeft
+        cmp #ENEMY_SPIDER
+        beq spiderLeft
     hedgehogLeft:
         // Set the number of animation frames
         lda #[TABLES.__hedgehogWalkLeft - TABLES.hedgehogWalkLeft - 1]
@@ -187,6 +218,31 @@ ENEMY: {
         sta VIC.SPRITE_COLOUR_7
 
         lda #BIRD_SPEED
+        sta enemy2Speed
+        jmp setSprite2Pos
+    spiderLeft:
+        // Set the number of animation frames
+        lda #[TABLES.__spiderWalkRight - TABLES.spiderWalkRight - 1]
+        sta enemy2Frames
+        lda #<TABLES.spiderWalkRight
+        sta.zp ENEMY2_RIGHT_FRAME_TABLE
+        lda #>TABLES.spiderWalkRight
+        sta.zp ENEMY2_RIGHT_FRAME_TABLE + 1
+        lda #<TABLES.spiderWalkLeft
+        sta.zp ENEMY2_LEFT_FRAME_TABLE
+        lda #>TABLES.spiderWalkLeft
+        sta.zp ENEMY2_LEFT_FRAME_TABLE + 1
+
+        lda #SPIDER_ANIMATION_SPEED
+        sta enemy2AnimationSpeed
+
+        lda #0
+        sta enemy2Frame
+        sta SPRITE_POINTERS + 7
+        lda #BROWN
+        sta VIC.SPRITE_COLOUR_7
+
+        lda #SPIDER_SPEED
         sta enemy2Speed
 
     setSprite2Pos:

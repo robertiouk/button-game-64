@@ -59,7 +59,7 @@ TABLES: {
     levelEnemy1Y:
         .byte $bd
     levelEnemy1Type:
-        .byte $02
+        .byte $03       // 01 = Hedgehog, 02 = Bird, 03 = Spider
     levelEnemy2XLo:
         .byte $20
     levelEnemy2XHi:
@@ -67,7 +67,7 @@ TABLES: {
     levelEnemy2Y:
         .byte $bd
     levelEnemy2Type:
-        .byte $01
+        .byte $03
 
     hedgehogWalkLeft:
         .byte $62, $63
@@ -84,6 +84,14 @@ TABLES: {
     birdFlyRight:
         .byte $79, $7a, $7b, $7c, $7d, $7e, $7f, $80
     __birdFlyRight:
+
+    spiderWalkLeft:
+        .byte $6f, $70, $71, $72, $73, $74, $75, $76
+    __spiderWalkLeft:
+
+    spiderWalkRight:
+        .byte $67, $68, $69, $6a, $6b, $6c, $6d, $6e
+    __spiderWalkRight:
 
     pickupFall:
         .byte $03, $02, $02, $02, $01 

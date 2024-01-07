@@ -1622,7 +1622,7 @@ PLAYER: {
         jmp check2Done
     decP2Gauge:
         inc player2GaugeTick
-        lda #player2State
+        lda player2State + 1
         and #STATE_EXTRA_LIFE
         bne !longTick+
     !shortTick:
