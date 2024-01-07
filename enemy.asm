@@ -38,6 +38,8 @@ ENEMY: {
         .byte $00
     enemy1CollisionPoint:
         .byte $00
+    enemy1FootCollisionPoint:
+        .byte $00
     enemy1JumpIndex:
         .byte $00
 
@@ -58,6 +60,8 @@ ENEMY: {
     enemy2Speed:
         .byte $00
     enemy2CollisionPoint:
+        .byte $00
+    enemy2FootCollisionPoint:
         .byte $00
     enemy2JumpIndex:
         .byte $00
@@ -402,9 +406,9 @@ ENEMY: {
         sta speed
         lda #>enemy2Speed
         sta speed + 1
-        lda #<enemy2CollisionPoint
+        lda #<enemy2FootCollisionPoint
         sta collision
-        lda #>enemy2CollisionPoint
+        lda #>enemy2FootCollisionPoint
         sta collision + 1
         jmp setupComplete
     setupEnemy1:
@@ -424,9 +428,9 @@ ENEMY: {
         sta speed
         lda #>enemy1Speed
         sta speed + 1
-        lda #<enemy1CollisionPoint
+        lda #<enemy1FootCollisionPoint
         sta collision
-        lda #>enemy1CollisionPoint
+        lda #>enemy1FootCollisionPoint
         sta collision + 1
     setupComplete:
 
@@ -475,7 +479,7 @@ ENEMY: {
         bcc switchDirection
         ldy #0
         lda (collision), y
-        cmp #03
+        cmp #COLLISION_TURN
         beq switchDirection
         jmp !+
     switchDirection:
@@ -523,7 +527,7 @@ ENEMY: {
         bcs !switchDirection+
         ldy #0
         lda (collision), y
-        cmp #03
+        cmp #COLLISION_TURN
         beq !switchDirection+
         jmp !+
     !switchDirection:
@@ -592,6 +596,7 @@ ENEMY: {
         .var floorCollision = VECTOR2
         .var yPos = VECTOR3
         .var jumpIndex = VECTOR4
+        .var footCollision = VECTOR5
         .var currentEnemy = TEMP1
 
         jsr floorCollisionCheck
@@ -623,6 +628,10 @@ ENEMY: {
         sta jumpIndex
         lda #>enemy2JumpIndex
         sta jumpIndex + 1
+        lda #<enemy2FootCollisionPoint
+        sta footCollision
+        lda #>enemy2FootCollisionPoint
+        sta footCollision + 1
         jmp setupDone
     setupEnemy1:
         lda enemy1Type
@@ -646,11 +655,15 @@ ENEMY: {
         sta jumpIndex
         lda #>enemy1JumpIndex
         sta jumpIndex + 1
+        lda #<enemy1FootCollisionPoint
+        sta footCollision
+        lda #>enemy1FootCollisionPoint
+        sta footCollision + 1
     setupDone:
 
         // ********* Check Enemy 1 **********
         ldy #0
-        lda (floorCollision), y
+        lda (footCollision), y
         cmp #COLLISION_JUMP
         bne !+
         // Jump
@@ -770,6 +783,14 @@ ENEMY: {
         lda ATTR_DATA, x
         and #$f0
         sta enemy1CollisionPoint
+        // Set front foot collision?
+        lda enemy1State
+        and #MOVE_LEFT
+        beq !+
+        lda enemy1CollisionPoint
+        sta enemy1FootCollisionPoint
+    !:
+
         // Right foot
         lda #0
         ldx #22     // Right double-pixel location / 2
@@ -778,6 +799,16 @@ ENEMY: {
         jsr UTILS.getCharacterAt
         tax
         lda ATTR_DATA, x
+        tax
+        // Set front foot collision?
+        lda enemy1State
+        and #MOVE_RIGHT
+        beq !+
+        txa
+        and #$f0
+        sta enemy1FootCollisionPoint
+    !:
+        txa
         ora enemy1CollisionPoint
         and #$f0
         sta enemy1CollisionPoint
@@ -797,6 +828,13 @@ ENEMY: {
         lda ATTR_DATA, x
         and #$f0
         sta enemy2CollisionPoint
+        // Set front foot collision?
+        lda enemy2State
+        and #MOVE_LEFT
+        beq !+
+        lda enemy2CollisionPoint
+        sta enemy2FootCollisionPoint
+    !:
         // Right foot
         lda #1
         ldx #22     // Right double-pixel location / 2
@@ -805,6 +843,16 @@ ENEMY: {
         jsr UTILS.getCharacterAt
         tax
         lda ATTR_DATA, x
+        tax
+        // Set front foot collision?
+        lda enemy2State
+        and #MOVE_RIGHT
+        beq !+
+        txa
+        and #$f0
+        sta enemy2FootCollisionPoint
+    !:
+        txa
         ora enemy2CollisionPoint
         and #$f0
         sta enemy2CollisionPoint
