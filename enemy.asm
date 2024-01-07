@@ -204,6 +204,29 @@ ENEMY: {
     }
 
     drawEnemy: {
+        .var actualAnimationSpeed1 = TEMP1
+        .var actualAnimationSpeed2 = TEMP2
+
+        // Initial setup
+        lda enemy1AnimationSpeed
+        sta actualAnimationSpeed1
+        lda enemy2AnimationSpeed
+        sta actualAnimationSpeed2
+        // Check for player super sense and adjust animation speed
+        lda PLAYER.player1State
+        and #PLAYER.STATE_SUPER_SENSE
+        bne slowSpeed
+        lda PLAYER.player2State
+        and #PLAYER.STATE_SUPER_SENSE
+        bne slowSpeed
+        jmp speedSet
+    slowSpeed:
+        clc
+        rol actualAnimationSpeed1
+        clc
+        rol actualAnimationSpeed2
+    speedSet:
+
         // ********* Draw Enemy 1 ***********
         // Set sprite position
         lda enemy1X + 1
@@ -212,7 +235,7 @@ ENEMY: {
         lda enemy1Y
         sta VIC.SPRITE_6_Y
         lda.zp FRAME_COUNTER
-        and enemy1AnimationSpeed
+        and actualAnimationSpeed1
         cmp FRAME_COUNTER   
         bne drawSecond
         // Set sprite frame
@@ -247,7 +270,7 @@ ENEMY: {
         lda enemy2Y
         sta VIC.SPRITE_7_Y
         lda.zp FRAME_COUNTER
-        and enemy2AnimationSpeed
+        and actualAnimationSpeed2
         cmp FRAME_COUNTER   
         bne done
         // Set sprite frame

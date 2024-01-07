@@ -67,7 +67,7 @@ TABLES: {
     levelEnemy2Y:
         .byte $bd
     levelEnemy2Type:
-        .byte $02
+        .byte $01
 
     hedgehogWalkLeft:
         .byte $62, $63
