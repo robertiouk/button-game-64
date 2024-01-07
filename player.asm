@@ -1032,8 +1032,8 @@ PLAYER: {
         bne jumpCheck
         // Check if character has hit the ground
         lda (floorCollision), y
-        cmp #COLLISION_SOLID
-        bne falling
+        and #COLLISION_SOLID
+        beq falling
         // Stop falling
         lda (state), y
         and #STATE_FALL
