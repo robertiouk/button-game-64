@@ -56,15 +56,16 @@ loop:
     dec performFrameCodeFlag
 
     jsr PLAYER.playerControl
-    jsr PLAYER.drawPlayer
+   // jsr PLAYER.drawPlayer
     jsr BUTTERFLY.moveButterfly
-    jsr BUTTERFLY.drawButterfly
-    jsr PICKUP.collisionCheck
+  //  jsr BUTTERFLY.drawButterfly
+   // jsr PICKUP.collisionCheck
     jsr PICKUP.movePickup
     jsr PICKUP.drawPickup
     jsr ENEMY.moveEnemy
     jsr ENEMY.drawEnemy
-    jsr PLAYER.collisionCheck
+    jsr ENEMY.jumpAndFall
+   // jsr PLAYER.collisionCheck
     jsr PLAYER.jumpAndFall
     jsr PLAYER.gaugeCheck
 
