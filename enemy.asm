@@ -2,8 +2,14 @@ ENEMY: {
     .label MOVE_LEFT  = %00000001
     .label MOVE_RIGHT = %00000010
     .label HEDGEHOG_SPEED = $7f
+    .label HEDGEHOG_ANIMATION_SPEED = %11111000  // every 8th frame
+    .label BIRD_SPEED = $ff
+    .label BIRD_ANIMATION_SPEED = %11111100 // every 4th frame
     .label MIN_X = $1c
     .label MAX_X = $3c
+    .label ENEMY_HEDGEHOG = $01
+    .label ENEMY_BIRD = $02
+    .label ENEMY_SPIDER = $03
 
     enemy1X:
         .byte $00, $00, $00
@@ -11,11 +17,11 @@ ENEMY: {
         .byte $00
     enemy1Type:
         .byte $00
-    enemy1LeftTable:
-        .byte $00, $00
-    enemy1RightTable:
-        .byte $00, $00
     enemy1Frame:
+        .byte $00
+    enemy1Frames:
+        .byte $00
+    enemy1AnimationSpeed:
         .byte $00
     enemy1State:
         .byte $00
@@ -28,11 +34,11 @@ ENEMY: {
         .byte $00
     enemy2Type:
         .byte $00
-    enemy2LeftTable:
-        .byte $00, $00
-    enemy2RightTable:
-        .byte $00, $00
     enemy2Frame:
+        .byte $00
+    enemy2Frames:
+        .byte $00
+    enemy2AnimationSpeed:
         .byte $00
     enemy2State:
         .byte $00
@@ -58,23 +64,61 @@ ENEMY: {
         // Get the first enemy type
         lda TABLES.levelEnemy1Type, x
         sta enemy1Type
-        cmp #1
+        cmp #ENEMY_HEDGEHOG
         beq hedgehogRight
+        cmp #ENEMY_BIRD
+        beq birdRight
     hedgehogRight:
-        lda TABLES.hedgehogWalkLeft
-        sta enemy1LeftTable
-        lda TABLES.hedgehogWalkLeft + 1
-        sta enemy1LeftTable + 1
-        lda TABLES.hedgehogWalkRight
-        sta enemy1RightTable
-        lda TABLES.hedgehogWalkRight + 1
-        sta enemy1RightTable + 1
+        // Set the number of animation frames
+        lda #[TABLES.__hedgehogWalkRight - TABLES.hedgehogWalkRight - 1]
+        sta enemy1Frames
+        lda #<TABLES.hedgehogWalkRight
+        sta.zp ENEMY1_RIGHT_FRAME_TABLE
+        lda #>TABLES.hedgehogWalkRight
+        sta.zp ENEMY1_RIGHT_FRAME_TABLE + 1
+        lda #<TABLES.hedgehogWalkLeft
+        sta.zp ENEMY1_LEFT_FRAME_TABLE
+        lda #>TABLES.hedgehogWalkLeft
+        sta.zp ENEMY1_LEFT_FRAME_TABLE + 1
+
+        lda #HEDGEHOG_ANIMATION_SPEED
+        sta enemy1AnimationSpeed
+
         lda #0
         sta enemy1Frame
         sta SPRITE_POINTERS + 6
         lda #BROWN
         sta VIC.SPRITE_COLOUR_6
         
+        lda #HEDGEHOG_SPEED
+        sta enemy1Speed
+        jmp setSprite1Pos
+    birdRight:
+        // Set the number of animation frames
+        lda #[TABLES.__birdFlyRight - TABLES.birdFlyRight - 1]
+        sta enemy1Frames
+        lda #<TABLES.birdFlyRight
+        sta.zp ENEMY1_RIGHT_FRAME_TABLE
+        lda #>TABLES.birdFlyRight
+        sta.zp ENEMY1_RIGHT_FRAME_TABLE + 1
+        lda #<TABLES.birdFlyLeft
+        sta.zp ENEMY1_LEFT_FRAME_TABLE
+        lda #>TABLES.birdFlyLeft
+        sta.zp ENEMY1_LEFT_FRAME_TABLE + 1
+
+        lda #BIRD_ANIMATION_SPEED
+        sta enemy1AnimationSpeed
+
+        lda #0
+        sta enemy1Frame
+        sta SPRITE_POINTERS + 6
+        lda #BROWN
+        sta VIC.SPRITE_COLOUR_6
+
+        lda #BIRD_SPEED
+        sta enemy1Speed
+
+    setSprite1Pos:
         // Set sprite1 pos
         lda TABLES.levelEnemy1XLo, x
         sta enemy1X + 1
@@ -84,29 +128,68 @@ ENEMY: {
         sta enemy1Y
         lda #MOVE_RIGHT
         sta enemy1State
-        lda #HEDGEHOG_SPEED
-        sta enemy1Speed
 
+
+    // ************ Second Enemy *************
+    setupSecond:
         // Setup the second enemy
         lda TABLES.levelEnemy2Type, x
         sta enemy2Type
-        cmp #1
+        cmp #ENEMY_HEDGEHOG
         beq hedgehogLeft
+        cmp #ENEMY_BIRD
+        beq birdLeft
     hedgehogLeft:
-        lda TABLES.hedgehogWalkLeft
-        sta enemy2LeftTable
-        lda TABLES.hedgehogWalkLeft + 1
-        sta enemy2LeftTable + 1
-        lda TABLES.hedgehogWalkRight
-        sta enemy2RightTable
-        lda TABLES.hedgehogWalkRight + 1
-        sta enemy2RightTable + 1
+        // Set the number of animation frames
+        lda #[TABLES.__hedgehogWalkLeft - TABLES.hedgehogWalkLeft - 1]
+        sta enemy2Frames
+        lda #<TABLES.hedgehogWalkRight
+        sta.zp ENEMY2_RIGHT_FRAME_TABLE
+        lda #>TABLES.hedgehogWalkRight
+        sta.zp ENEMY2_RIGHT_FRAME_TABLE + 1
+        lda #<TABLES.hedgehogWalkLeft
+        sta.zp ENEMY2_LEFT_FRAME_TABLE
+        lda #>TABLES.hedgehogWalkLeft
+        sta.zp ENEMY2_LEFT_FRAME_TABLE + 1
+
+        lda #HEDGEHOG_ANIMATION_SPEED
+        sta enemy2AnimationSpeed
+
         lda #0
         sta enemy2Frame
         sta SPRITE_POINTERS + 7
         lda #BROWN
         sta VIC.SPRITE_COLOUR_7
 
+        lda #HEDGEHOG_SPEED
+        sta enemy2Speed
+        jmp setSprite2Pos
+    birdLeft:
+        // Set the number of animation frames
+        lda #[TABLES.__birdFlyLeft - TABLES.birdFlyLeft - 1]
+        sta enemy2Frames
+        lda #<TABLES.birdFlyRight
+        sta.zp ENEMY2_RIGHT_FRAME_TABLE
+        lda #>TABLES.birdFlyRight
+        sta.zp ENEMY2_RIGHT_FRAME_TABLE + 1
+        lda #<TABLES.birdFlyLeft
+        sta.zp ENEMY2_LEFT_FRAME_TABLE
+        lda #>TABLES.birdFlyLeft
+        sta.zp ENEMY2_LEFT_FRAME_TABLE + 1
+
+        lda #BIRD_ANIMATION_SPEED
+        sta enemy2AnimationSpeed
+
+        lda #0
+        sta enemy2Frame
+        sta SPRITE_POINTERS + 7
+        lda #BROWN
+        sta VIC.SPRITE_COLOUR_7
+
+        lda #BIRD_SPEED
+        sta enemy2Speed
+
+    setSprite2Pos:
         // Set sprite2 pos
         lda TABLES.levelEnemy2XLo, x
         sta enemy2X + 1
@@ -116,13 +199,12 @@ ENEMY: {
         sta enemy2Y
         lda #MOVE_LEFT
         sta enemy2State
-        lda #HEDGEHOG_SPEED
-        sta enemy2Speed
 
         rts
     }
 
     drawEnemy: {
+        // ********* Draw Enemy 1 ***********
         // Set sprite position
         lda enemy1X + 1
         sta VIC.SPRITE_6_X
@@ -130,7 +212,7 @@ ENEMY: {
         lda enemy1Y
         sta VIC.SPRITE_6_Y
         lda.zp FRAME_COUNTER
-        and #%11111000  // every 8th frame
+        and enemy1AnimationSpeed
         cmp FRAME_COUNTER   
         bne drawSecond
         // Set sprite frame
@@ -138,23 +220,25 @@ ENEMY: {
         and #MOVE_LEFT
         beq drawRight1
     drawLeft1:
-        ldx enemy1Frame
-        lda enemy1LeftTable, x
+        ldy enemy1Frame
+        lda (ENEMY1_LEFT_FRAME_TABLE), y
         jmp drawFrame
     drawRight1:
-        ldx enemy1Frame
-        lda enemy1RightTable, x
+        ldy enemy1Frame
+        lda (ENEMY1_RIGHT_FRAME_TABLE), y
     drawFrame:
         sta SPRITE_POINTERS + 6
     incFrame:
         lda enemy1Frame
-        cmp #1
-        beq decFrame
+        cmp enemy1Frames
+        beq resetFrame
         inc enemy1Frame
         jmp drawSecond
-    decFrame:
-        dec enemy1Frame
+    resetFrame:
+        lda #0
+        sta enemy1Frame
 
+    // ********* Draw Enemy 2 ***********
     drawSecond:
         // Set sprite position
         lda enemy2X + 1
@@ -163,7 +247,7 @@ ENEMY: {
         lda enemy2Y
         sta VIC.SPRITE_7_Y
         lda.zp FRAME_COUNTER
-        and #%11111000  // every 8th frame
+        and enemy2AnimationSpeed
         cmp FRAME_COUNTER   
         bne done
         // Set sprite frame
@@ -171,22 +255,23 @@ ENEMY: {
         and #MOVE_LEFT
         beq drawRight2
     drawLeft2:
-        ldx enemy2Frame
-        lda enemy2LeftTable, x
+        ldy enemy2Frame
+        lda (ENEMY2_LEFT_FRAME_TABLE), y
         jmp drawFrame2
     drawRight2:
-        ldx enemy2Frame
-        lda enemy2RightTable, x
+        ldy enemy2Frame
+        lda (ENEMY2_RIGHT_FRAME_TABLE), y
     drawFrame2:
         sta SPRITE_POINTERS + 7
     incFrame2:
         lda enemy2Frame
-        cmp #1
-        beq decFrame2
+        cmp enemy2Frames
+        beq !resetFrame+
         inc enemy2Frame
         jmp done
-    decFrame2:
-        dec enemy2Frame
+    !resetFrame:
+        lda #0
+        sta enemy2Frame
 
     done:
 

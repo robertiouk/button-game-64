@@ -30,3 +30,9 @@
 .label LEVEL = $1f
 
 .label SPRITE_COLLISION = $20
+
+// Vectors for sprite frame lookup
+.label ENEMY1_RIGHT_FRAME_TABLE = $21
+.label ENEMY1_LEFT_FRAME_TABLE = $23
+.label ENEMY2_RIGHT_FRAME_TABLE = $25
+.label ENEMY2_LEFT_FRAME_TABLE = $27

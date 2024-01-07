@@ -59,7 +59,7 @@ TABLES: {
     levelEnemy1Y:
         .byte $bd
     levelEnemy1Type:
-        .byte $01
+        .byte $02
     levelEnemy2XLo:
         .byte $20
     levelEnemy2XHi:
@@ -67,7 +67,7 @@ TABLES: {
     levelEnemy2Y:
         .byte $bd
     levelEnemy2Type:
-        .byte $01
+        .byte $02
 
     hedgehogWalkLeft:
         .byte $62, $63
@@ -75,7 +75,15 @@ TABLES: {
 
     hedgehogWalkRight:
         .byte $64, $65
-    __hedgeHogWalkRight:
+    __hedgehogWalkRight:
+
+    birdFlyLeft:
+        .byte $81, $82, $83, $84, $85, $86, $87, $88
+    __birdFlyLeft:
+
+    birdFlyRight:
+        .byte $79, $7a, $7b, $7c, $7d, $7e, $7f, $80
+    __birdFlyRight:
 
     pickupFall:
         .byte $03, $02, $02, $02, $01 
