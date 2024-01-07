@@ -20,6 +20,9 @@ ENEMY: {
     .label ENEMY_BIRD = $02
     .label ENEMY_SPIDER = $03
 
+    .label SPIDER_JUMP_LEFT_FRAME = $78
+    .label SPIDER_JUMP_RIGHT_FRAME = $77
+
     enemy1X:
         .byte $00, $00, $00
     enemy1Y:
@@ -318,10 +321,22 @@ ENEMY: {
         and #MOVE_LEFT
         beq drawRight1
     drawLeft1:
+        lda enemy1State
+        and #[STATE_FALL + STATE_JUMP]
+        beq notJumpingLeft1
+        lda #SPIDER_JUMP_LEFT_FRAME
+        jmp drawFrame
+    notJumpingLeft1:
         ldy enemy1Frame
         lda (ENEMY1_LEFT_FRAME_TABLE), y
         jmp drawFrame
     drawRight1:
+        lda enemy1State
+        and #[STATE_FALL + STATE_JUMP]
+        beq notJumpingRight1
+        lda #SPIDER_JUMP_RIGHT_FRAME
+        jmp drawFrame
+    notJumpingRight1:
         ldy enemy1Frame
         lda (ENEMY1_RIGHT_FRAME_TABLE), y
     drawFrame:
@@ -353,10 +368,22 @@ ENEMY: {
         and #MOVE_LEFT
         beq drawRight2
     drawLeft2:
+        lda enemy2State
+        and #[STATE_FALL + STATE_JUMP]
+        beq notJumpingLeft2
+        lda #SPIDER_JUMP_LEFT_FRAME
+        jmp drawFrame2
+    notJumpingLeft2:
         ldy enemy2Frame
         lda (ENEMY2_LEFT_FRAME_TABLE), y
         jmp drawFrame2
     drawRight2:
+        lda enemy2State
+        and #[STATE_FALL + STATE_JUMP]
+        beq notJumpingRight2
+        lda #SPIDER_JUMP_RIGHT_FRAME
+        jmp drawFrame2
+    notJumpingRight2:
         ldy enemy2Frame
         lda (ENEMY2_RIGHT_FRAME_TABLE), y
     drawFrame2:
