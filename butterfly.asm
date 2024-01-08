@@ -140,6 +140,7 @@ BUTTERFLY: {
     white:
         ldx #0
     done:
+        ldx #1
         ldy #0
         txa
         sta (type), y

@@ -789,8 +789,14 @@ ENEMY: {
         jmp !+
     halfSpeedJump:
         lda FRAME_COUNTER
-        and #2
+        and #1
         beq !+
+        clc
+        ror deltaValue
+        sec
+        lda (yPos), y
+        sbc deltaValue
+        sta (yPos), y
         jmp updatedJumpIndex
     !:
 
